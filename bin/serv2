@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+import sys, os, os.path, getopt, termRep, ConfigParser
+True = (1 == 1)
+False = (not True)
+
+def usage(s=None):
+  if s != None: print '!!! %s !!!' % s
+  print """
+Usage: serv [c <conf file>] [fsp] <server name>
+connect to the named server,
+looking into the ~/hosts.lst file
+
+If the server name is not complete, it try to find the one
+with the nameFriend lib
+
+Params:
+  -l/--list : list the servers names
+  -h/--help : this help
+
+  -f/--ftp <server name> : launch a sftp session
+  -s/--ssh <server name> : launch a ssh session
+  -p/--cp <server name> <file> [<server name> [<file>]] :
+              copy files with scp, the server name "-" mean localhost
+              for defaults, see scp
+
+  -c/--conf-file <conf file> : set the configuration file ( default $HOME/hosts.lst )
+
+  --color-from <server name> : return the term color for this server
+  --color <color name> :
+               return a term color by name
+               for color list, see lib termRep
+  """
+  sys.exit(1)
+
+
+class ServerList:
+  def __init__(self, confFile):
+    self._content = {}
+    self.loadConf(confFile)
+    print self._content
+
+  def loadConf(self, confFile):
+    self._content = {}
+    cf = ConfigParser.SafeConfigParser({'port':'22'})
+    cf.read(confFile)
+    for s in cf.sections():
+      sec = {}
+      for n, v in cf.items(s): sec[n] = v
+      self._content[s] = sec
+
+
+  def do_list(self, arg, *opts): print 'list'
+  def do_ftp(self, arg, *opts): print 'ftp'
+  def do_ssh(self, arg, *opts): print 'ssh'
+  def do_cp(self, arg, *opts): print 'cp'
+  def do_list(self, arg, *opts): print 'list'
+  def do_colorFrom(self, arg, *opts): print 'colorFrom'
+
+
+
+
+
+
+
+if __name__ == '__main__':
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], "lhf:s:p:c:", ['list', 'conf-file=', 'ftp=', 'ssh=', 'cp', 'help', 'color-from=', 'color='])
+  except getopt.GetoptError:
+    usage()
+
+  #defaults values
+  fct = ''
+  servName = None
+  confFile = os.path.join(os.getenv('HOME') , 'hosts.lst')
+  listFiles = False
+  for opt, arg in opts:
+    if opt in ('-h', '--help'): usage()
+    if opt in ('-c', '--conf-file'): confFile = arg
+    if opt in ('color'): termRep.echo(arg) ; sys.exit(0)
+    if opt in ('-f', '--ftp'):  fct, servName = fct+'ftp'      , arg
+    if opt in ('-s', '--ssh'):  fct, servName = fct+'ssh'      , arg
+    if opt in ('-p', '--cp'):   fct, servName = fct+'cp'       , arg
+    if opt in ('-l', '--list'): fct, servName = fct+'list'     , arg
+    if opt in ('color-from'):   fct, servName = fct+'colorFrom', arg
+
+  if fct == '': usage('no action selected')
+  assert os.path.isfile(confFile), 'the configuration file [%s] don\'t exists' %(confFile)
+
+  sl = ServerList(confFile)
+
+  if 'do_'+fct not in dir(sl):
+    assert False, usage('only one action accepted')
+
+  cmds = getattr(sl, 'do_'+fct)(servName, *opt)
+  if cmds: os.execlp(*cmds)
+
+  sys.exit(0)
+
+#__EOF__

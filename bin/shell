@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+#used because setting that into $SHELL variable gives probems
+/usr/bin/env bash --init-file "$et/env/conf/profile.bash"
+
+#__EOF__

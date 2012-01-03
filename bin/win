@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -eu
+
+usage(){
+  typeset msg="${1:-}"
+  {
+    [ -n "$msg" ] && echo "!!!$msg!!!"
+    echo "Launch a screen inside a RXVT terminal"
+    echo "$prog [name...]"
+    echo "if the name is not set, the name 'RXVT - Screen' is used"
+  } >&2
+}
+
+
+prog="$0"
+title="${*:-RXVT - Screen}"
+scrUID="${*:-$(date +%Y%m%d_%H%M%S)}"
+
+if [ -z "${SCREEN:-}" ]; then
+  echo '${SCREEN} variable not set, using "screen"' >&2
+  SCREEN=screen
+fi
+
+screen_launch="$SCREEN -S $scrUID"
+screen_size="${SCREEN_SIZE:-160x60}"
+
+[ -n "$et" ] && cd "$et"
+
+rxvt \
+--title "$title" \
+-bg 'rgb:00/00/20' \
+-fg 'rgb:C0/C0/C0' \
+-fn '-*-Consolas-regular-*-*-*-14-*-*-*-*-*-*-*' \
+-fb '-*-Consolas-bold-*-*-*-14-*-*-*-*-*-*-*' \
+-vb \
++sb \
+-sl 0 \
+-geometry $screen_size \
+--color1 red \
+--color2 rgb:72/A0/32 \
+--color4 skyblue \
+--color3 yellow \
+--color5 magenta \
+--color6 rgb:20/C0/A0 \
+--color7 rgb:C0/C0/C0 \
+--color9 red \
+--color10 rgb:72/A0/32 \
+--color12 skyblue \
+--color11 yellow \
+--color13 magenta \
+--color14 rgb:20/C0/A0 \
+--color15 rgb:C0/C0/C0 \
+--colorBD rgb:C0/C0/C0 \
+-e $screen_launch \
+&
+
+#__EOF__

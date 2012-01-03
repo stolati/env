@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+ps -fu "${1:-$USER}"
+#__EOF__

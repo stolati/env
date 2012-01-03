@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+comp_type="tgz"
+[ $# -eq 1 ] && [ ! -d $1 ] && comp_type="gz"
+
+case "$comp_type" in
+  tgz)
+    name=$( echo "$1" | sed 's/\/\+$//g' )
+    echo "tar cvf - '$@' | gzip > '$name.tgz'"
+    tar cvf - "$@" | gzip > "$name.tgz"
+    echo "$name.tgz created"
+  ;;
+  gz)
+    echo "gzip '$1'"
+    cat "$1" | gzip > "$1.gz"
+    echo "$1.gz created"
+  ;;
+esac
+
+#__EOF__

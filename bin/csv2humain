@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+import sys
+True = (1 == 1)
+False = (not True)
+
+def fillBlanck(str, i): #fill with blanck before
+  while(len(str) < i): str = ' ' + str
+  return str
+
+
+if len(sys.argv) != 4:
+  print 'bad use : <separator> <input> <output>'
+  sys.exit(2)
+
+separator = sys.argv[1]
+inputPath = sys.argv[2]
+outputPath = sys.argv[3]
+
+maxSizes = []
+
+#calcul the maximum size for each column
+input = open(inputPath, 'r')
+while True:
+  line = input.readline()
+  if not line : break #EOF
+
+  sizes = [len(e) for e in line.split(separator)]
+
+  for i in range(len(sizes)):
+    if len(maxSizes) > i:
+      maxSizes[i] = max(maxSizes[i], sizes[i])
+    else :
+      maxSizes.append(sizes[i])
+input.close()
+
+print maxSizes
+
+#write the maximum size
+input = open(inputPath, 'r')
+output = open(outputPath, 'w')
+while True:
+  line = input.readline()
+  if not line : break #EOF
+
+  values = line.split(separator)
+
+  for i in range(len(values)):
+    #print 'len(%s)=%s need %s'%(values[i], str(len(values[i])), str(maxSizes[i]))
+    values[i] = fillBlanck(values[i], maxSizes[i])
+    #print 'got :"'+values[i]+'"'
+  output.write(separator.join(values))
+
+input.close()
+output.close()
+

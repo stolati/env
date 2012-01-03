@@ -1,0 +1,246 @@
+#!/usr/bin/env python
+import sys, os, os.path, getopt
+True = (1 == 1)
+False = (not True)
+
+
+def usage(s=None):
+  if s != None: print '!!!', s
+  print """
+Usage: serv [c <conf file>] [fsp] <server name>
+connect to the named server,
+looking into the ~/hosts.lst file
+
+If the server name is not complete, it try to find the one
+
+Params:
+  -l/--list : list the servers names
+  -h/--help              : this help
+
+  -f/--ftp <server name> : ftp protocol
+  -s/--ssh <server name> : ssh protocol
+  -p/--sftp <server name> : sftp protocol
+
+  -c/--config-file <conf file> : set the configuration file ( default $HOME/hosts.lst )
+  """
+  sys.exit(1)
+
+
+class ServerList:
+  def __init__(self):
+    self._content = {} #hash of server names
+
+  def findHostsLst(self):
+    return os.getenv('HOME') + '/hosts.lst'
+
+  #######
+  # names checking system
+  #######
+  def checkName(self, name):
+    if self._content.has_key(name): return name
+    return None
+
+  def getApproxName(self, name):
+    res = []
+    for n in self._content.keys():
+      if n.find(name) != -1: res.append(n)
+    return res
+
+  def getAllNames(self):
+    return self._content.keys()
+
+
+  #######
+  # loading the file
+  #######
+  def loadFile(self, f):
+    input = open(f, 'r')
+    lineNb = 0
+    currentName = None
+    currentValue = {}
+
+    while True:
+      line = input.readline()
+      if not line : break #EOF
+      lineNb += 1
+      line = line.strip()
+      if not line: continue #don't take empty line
+      if line[0] == '#': continue #don't take coment
+
+      #case 1 : header
+      if line[0] == '[':
+        if currentName != None:
+          self._content[currentName] = currentValue
+          currentValue = {}
+
+        assert line[-1] == ']', 'line %d bad format:%s' %(lineNb, line)
+        currentName = line[1:-1]
+        assert currentName, 'line %d bad format:%s' %(lineNb, line)
+        assert not self._content.has_key(currentName), 'name "%s" already defined' %(currentName)
+
+      #case 2 : value
+      else:
+        arr = line.split('=')
+        assert len(arr) >= 2, 'line %d bad format:%s' %(lineNb, line)
+        name = arr[0]
+        value = '='.join(arr[1:])
+        #TODO special case if the value is sourounded by "
+        currentValue[name] = value
+
+    if currentName != None:
+      self._content[currentName] = currentValue
+      currentValue = {}
+
+    input.close()
+
+  #######
+  # connection routines
+  #######
+  def _assertGet(self, h, *args):
+    for n in args:
+      if h.has_key(n): return h[n]
+    assert False, 'names [%s] not found' % ', '.join(args)
+
+  def _defGet(self, h, default, *args):
+    for n in args:
+      if h.has_key(n): return h[n]
+    return default
+
+  def connect_ftp(self, name):
+    vals = self._content[name]
+    #load the variables
+    url = self._assertGet(vals, 'ftp_url', 'url')
+    user = self._assertGet(vals, 'ftp_user', 'user')
+    port = self._defGet(vals, None, 'ftp_port', 'port')
+    pwd = self._defGet(vals, None, 'ftp_password', 'password')
+    path = self._defGet(vals, None, 'ftp_path', 'path')
+    #generate except code
+    res = ['log_user 0']
+    if port:
+      res.append('spawn ftp %(url)s %(port)s')
+    else:
+      res.append('spawn ftp %(url)s')
+    res.append('expect "*Name*"')
+    res.append('send -- "%(user)s\r"')
+    if pwd:
+      res.append('expect "*?assword:*"')
+      res.append('send -- "%(pwd)s\r"')
+    if path:
+      res.append('expect "*ftp>*"')
+      res.append('send -- "cd %(path)s\r"')
+    res.append('interact')
+
+    return ('expect', 'expect', '-c', '\n'.join(res) % locals())
+
+  def connect_ssh(self, name):
+    vals = self._content[name]
+    #load the variables
+    url = self._assertGet(vals, 'ssh_url', 'url')
+    user = self._assertGet(vals, 'ssh_user', 'user')
+    port = self._defGet(vals, None, 'ssh_port', 'port')
+    pwd = self._defGet(vals, None, 'ssh_password', 'password')
+    cmd = self._defGet(vals, None, 'ssh_cmd')
+    #generate except code
+    res = ['log_user 0']
+    if port:
+      res.append('spawn ssh -X -p %(port)s %(user)s@%(url)s')
+    else:
+      res.append('spawn ssh -X %(user)s@%(url)s')
+    if pwd:
+      res.append('expect "*?assword:*"')
+      res.append('send -- "%(pwd)s\r"')
+    if cmd:
+      res.append('sleep 1')
+      res.append('send -- "%(cmd)s\r"')
+    res.append('interact')
+
+    return ('expect', 'expect', '-c', '\n'.join(res) % locals())
+
+  def connect_sftp(self, name):
+    vals = self._content[name]
+    #load the variables
+    url = self._assertGet(vals, 'ssh_url', 'ftp_url', 'url')
+    user = self._assertGet(vals, 'ssh_user', 'ftp_user', 'user')
+    port = self._defGet(vals, None, 'sftp_port')
+    pwd = self._defGet(vals, None, 'ssh_password', 'password')
+    path = self._defGet(vals, None, 'sftp_path', 'ftp_path', 'path')
+    #generate except code
+    res = ['log_user 0']
+    if port:
+      res.append('spawn sftp -p %(port)s "%(user)s@%(url)s:%(path)s"')
+    else:
+      res.append('spawn sftp "%(user)s@%(url)s:%(path)s"')
+    if pwd:
+      res.append('expect "*?assword:*"')
+      res.append('send -- "%(pwd)s\r"')
+    res.append('expect "sftp>"')
+    res.append('send -- "\r"')
+    res.append('interact')
+
+    return ('expect', 'expect', '-c', '\n'.join(res) % locals())
+
+if __name__ == '__main__':
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], "lc:hf:s:p:", ['list', 'conf-file=', 'sftp=', 'ftp=', 'ssh=', 'help'])
+  except getopt.GetoptError:
+    usage()
+
+  protocol = None
+  servName = None
+  confFile = None
+  listFiles = False
+  for opt, arg in opts:
+    if opt in ('-h', '--help'): usage()
+    if opt in ('-f', '--ftp'):
+      if protocol != None: usage('only one protocol allowed')
+      protocol = 'ftp'
+      servName = arg
+    if opt in ('-s', '--ssh'):
+      if protocol != None: usage('only one protocol allowed')
+      protocol = 'ssh'
+      servName = arg
+    if opt in ('-p', '--sftp'):
+      if protocol != None: usage('only one protocol allowed')
+      protocol = 'sftp'
+      servName = arg
+    if opt in ('-c', '--conf-file'):
+      if confFile != None : usage('only one conf-file param allowed')
+      confFile = arg
+    if opt in ('-l', '--list'):
+      if listFiles != False : usage('only one list files allowed')
+      listFiles = True
+  if protocol == None and listFiles == False:
+    usage('no protocol nor name selectioned')
+
+  sl = ServerList()
+
+  if confFile == None : confFile = sl.findHostsLst()
+  assert os.path.isfile(confFile), 'the configuration file [%s] don\'t exists' %(confFile)
+
+  sl.loadFile(confFile)
+
+  if listFiles:
+    print 'list of servers :'
+    lf = sl.getAllNames()
+    lf.sort()
+    for n in lf: print '-', n
+    sys.exit(0)
+
+  if not sl.checkName(servName):
+    l = sl.getApproxName(servName)
+    if len(l) == 0:
+      print 'name unknown, names allowed :'
+      for n in sl.getAllNames(): print '-', n
+      sys.exit(2)
+    if len(l) > 1:
+      print 'multiples names with those char :'
+      for n in l: print '-', n
+      sys.exit(3)
+    print 'founding name :', l[0]
+    servName = l[0]
+
+  #launch the connection
+  cmds = getattr(sl, 'connect_' + protocol)(servName)
+  print "%s : %s" %(protocol, servName)
+  os.execlp(*cmds)
+

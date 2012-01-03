@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import os, time, sys
+from os.path import *
+
+aide=""" <repertoire> <recursif>
+1 argument : 
+  repertoire = Le repertoire a etudier
+  recursif = T ou F, suivant si il faut traiter recursivement ou non
+  
+Ce script recupere la taille global des fichiers par journee
+et l'affiche dans un format a peu pres CSV
+"""
+
+if len(sys.argv) != 3 :
+  print sys.argv[0]+aide
+  sys.exit()
+
+name, inputPath, recursif = sys.argv
+
+if recursif not in ('T','F'):
+  print sys.argv[0]+aide
+  sys.exit()
+
+recursif = ( recursif == 'T' )
+
+#from http://snippets.dzone.com/posts/show/5434
+def prettySize(size):
+	suffixes = [("B",2**10L), ("K",2**20L), ("M",2**30L), ("G",2**40L), ("T",2**50L)]
+	for suf, lim in suffixes:
+		if size > lim: continue
+		return str(round(size/float(lim/2**10),2))+suf
+
+def filldict(result, path, rec):
+  for file in os.listdir(path):
+    file = normpath(join(path,file))
+    if rec and isdir(file): result = filldict(result, file, rec)
+    if not isfile(file): continue
+  
+    size = getsize(file)
+    date = time.strftime('%Y %m %d', time.gmtime(getmtime(file))) 
+
+    result[date] = result.get(date, 0L)+size
+    
+  return result
+
+def getStrInfo(result):
+  total=0L
+  toPrint=[]
+  for date, size in result.items():
+    toPrint.append( str(date)+';'+str(size)+';'+prettySize(size) )
+    total+=size
+
+  toPrint.append( 'TOTAL;'+str(total)+';'+prettySize(total)  )
+
+  toPrint.sort()
+  return '\n'.join(toPrint)
+
+# debut du code
+result = filldict({}, inputPath, recursif)
+print getStrInfo(result)

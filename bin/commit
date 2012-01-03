@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+#do the commit of git based repositiry
+#save all file that need to be saved
+#use the parameters as commit message
+
+
+#configuring git part
+config="git config --global"
+
+$config user.name "Stolati"
+$config user.email "mickael.kerbrat@gmail.com"
+
+$config github.user "Stolati"
+$config github.token "8bc4746e402b2bb7ab0811fb13422e95"
+
+#get the infos
+msg="$*"
+
+git add .
+git commit -m "$msg"
+
+
+#setting a git repo :
+#git init
+
+#__EFO__

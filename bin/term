@@ -1,0 +1,164 @@
+#!/usr/bin/env python
+
+#utilities for terminal
+# - color
+# - cursor moving
+
+
+class Location:
+  pass
+
+#class Location:
+#- Position the Cursor:
+#  \033[<L>;<C>H
+#     Or
+#  \033[<L>;<C>f
+#  puts the cursor at line L and column C.
+#- Move the cursor up N lines:
+#  \033[<N>A
+#- Move the cursor down N lines:
+#  \033[<N>B
+#- Move the cursor forward N columns:
+#  \033[<N>C
+#- Move the cursor backward N columns:
+#  \033[<N>D
+
+
+class Color:
+  _bg = {
+    'black' :'40',
+    'red'   :'41',
+    'green' :'42',
+    'yellow':'43',
+    'blue'  :'44',
+    'purple':'45',
+    'cyan'  :'46',
+    'lgray' :'47',
+  }
+
+  _fg = {
+    'black'  :'0;30',
+    'dgray'  :'1;30',
+    'blue'   :'0;34',
+    'lblue'  :'1;34',
+    'green'  :'0;32',
+    'lgreen' :'1;32',
+    'cyan'   :'0;36',
+    'lcyan'  :'1;36',
+    'red'    :'0;31',
+    'lred'   :'1;31',
+    'purple' :'0;35',
+    'lpurple':'1;35',
+    'brown'  :'0;33',
+    'yellow' :'1;33',
+    'lgray'  :'0;37',
+    'white'  :'1;37',
+  }
+
+  _special = {
+    'reset' : '0',
+    'underscore' : '4',
+    'bold' : '5',
+    'Inverse' :'7',
+  }
+
+  def getCode(self, s): return '\e[%sm' % s
+  def getFg(self, name): return getCode( _fg[name] )
+  def getBg(self, name): return getCode( _bg[name] )
+  def getSpecial(self, name): return getCode( _special[name] )
+
+if __name__ == "__main__":
+  print 'toto'
+  -f
+  -b
+  -m +1,
+  -m -1,
+
+-m L,C
+-m -N,
+-m +N,
+-m -N,
+-m +N,
+
+
+setColumn( int, relativ)
+setRow( int, relativ)
+
+getNbColumn() -> $COLUMNS
+getNbLines() -> $LINES
+
+
+getCode()
+
+
+
+
+#listBG="black red green yellow blue purple cyan lgray"
+#listFG="black dgray blue lblue green lgreen cyan lcyan red lred purple lpurple brown yellow lgray white"
+
+
+#getFGColor(){
+#  case "$1" in
+#    black)   printf '\e[0;30m' ;;
+#    dgray)   printf '\e[1;30m' ;;
+#    blue)    printf '\e[0;34m' ;;
+#    lblue)   printf '\e[1;34m' ;;
+#    green)   printf '\e[0;32m' ;;
+#    lgreen)  printf '\e[1;32m' ;;
+#    cyan)    printf '\e[0;36m' ;;
+#    lcyan)   printf '\e[1;36m' ;;
+#    red)     printf '\e[0;31m' ;;
+#    lred)    printf '\e[1;31m' ;;
+#    purple)  printf '\e[0;35m' ;;
+#    lpurple) printf '\e[1;35m' ;;
+#    brown)   printf '\e[0;33m' ;;
+#    yellow)  printf '\e[1;33m' ;;
+#    lgray)   printf '\e[0;37m' ;;
+#    white)   printf '\e[1;37m' ;;
+#    *) echo "fg color unknown, valid : [$listFG]" ; exit 1 ;;
+#  esac
+#}
+#
+#resetall(){ printf "\e[0m" ; }
+#
+#showall(){
+#  for bg in $listBG ; do
+#    getBGColor $bg
+#    for fg in $listBG ; do
+#      getFGColor $fg
+#      getBGColor $bg
+#      printf "abc 012"
+#      resetall
+#      echo "<-" $fg on $bg
+#    done
+#  done
+#  resetall
+#}
+#
+#
+#if [ "$1" = "show" ]; then
+#  showall
+#  exit 0
+#fi
+#
+#if [ "$1" = "reset" ]; then
+#  resetall
+#  exit 0
+#fi
+#
+#
+#getFGColor "$1"
+#
+#if [ -z "$2" ]; then
+#  exit 0
+#fi
+#
+#if [ "$2" != "on" ]; then
+#  echo "should be 'bg on fg'"
+#  exit 1
+#fi
+#
+#getBGColor "$3"
+#
+##__EOF__
+

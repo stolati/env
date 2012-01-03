@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+import sys, os, os.path, getopt
+True = (1 == 1)
+False = (not True)
+
+
+def usage(s=None):
+  if s != None: print '!!!', s
+  print """
+  """
+  sys.exit(1)
+
+
+class BadCharPurge:
+  def __init__(self): pass
+
+  char_lower = 'abcdefghijklmnopqrstuvwxyz'
+  char_upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  char_digit = '0123456789'
+  char_special = '!@#$%^&*(){}[]\'"\\ \t'
+
+  def _isGoodChar(self, s):
+    if s in char_lower: return True
+    if s in char_upper: return True
+    if s in char_digit: return True
+    if s in char_special: return True
+    return False
+
+  def getNbBadInLine(self, l):
+    res = []
+    i = 0
+    for s in l:
+      if not self._isGoodChar(s) : res.append(i)
+    return res
+
+  def getBadLines(self, f):
+    res = []
+    for line in f: pass
+
+
+  def cmd_contains(self, f):
+    for line in f:
+      if getNbBadInLine(line) != [] : return True
+    return False
+
+if __name__ == '__main__':
+  bcp = BadCharPurge()
+
+
+  #try:
+  #  opts, args = getopt.getopt(sys.argv[1:], "lc:hf:s:p:", ['list', 'conf-file=', 'sftp=', 'ftp=', 'ssh=', 'help'])
+  #except getopt.GetoptError:
+  #  usage()
+
+  
+
+
+
+#  protocol = None
+#  servName = None
+#  confFile = None
+#  listFiles = False
+#  for opt, arg in opts:
+#    if opt in ('-h', '--help'): usage()
+#    if opt in ('-f', '--ftp'):
+#      if protocol != None: usage('only one protocol allowed')
+#      protocol = 'ftp'
+#      servName = arg
+#    if opt in ('-s', '--ssh'):
+#      if protocol != None: usage('only one protocol allowed')
+#      protocol = 'ssh'
+#      servName = arg
+#    if opt in ('-p', '--sftp'):
+#      if protocol != None: usage('only one protocol allowed')
+#      protocol = 'sftp'
+#      servName = arg
+#    if opt in ('-c', '--conf-file'):
+#      if confFile != None : usage('only one conf-file param allowed')
+#      confFile = arg
+#    if opt in ('-l', '--list'):
+#      if listFiles != False : usage('only one list files allowed')
+#      listFiles = True
+#  if protocol == None and listFiles == False:
+#    usage('no protocol nor name selectioned')
+#
+#  sl = ServerList()
+#
+#  if confFile == None : confFile = sl.findHostsLst()
+#  assert os.path.isfile(confFile), 'the configuration file [%s] don\'t exists' %(confFile)
+#
+#  sl.loadFile(confFile)
+#
+#  if listFiles:
+#    print 'list of servers :'
+#    lf = sl.getAllNames()
+#    lf.sort()
+#    for n in lf: print '-', n
+#    sys.exit(0)
+#
+#  if not sl.checkName(servName):
+#    l = sl.getApproxName(servName)
+#    if len(l) == 0:
+#      print 'name unknown, names allowed :'
+#      for n in sl.getAllNames(): print '-', n
+#      sys.exit(2)
+#    if len(l) > 1:
+#      print 'multiples names with those char :'
+#      for n in l: print '-', n
+#      sys.exit(3)
+#    print 'founding name :', l[0]
+#    servName = l[0]
+#
+#  #launch the connection
+#  cmds = getattr(sl, 'connect_' + protocol)(servName)
+#  print "%s : %s" %(protocol, servName)
+#  os.execlp(*cmds)
+#

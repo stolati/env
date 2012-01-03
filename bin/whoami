@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo ${USER:-$USERNAME}
+#__EOF__

@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 1 ];then #if there is more than one
+  for i in "$@"; do
+    #launch the same program for each files
+    $0 "$i"
+  done
+  exit 0
+fi
+
+
+file_name=`basename "$1"`
+cd `dirname "$1"`
+
+printf "decompressing $file_name"
+
+while true ; do
+  file_ext="${file_name##*.}"
+  file_rest=`basename "$file_name" ."$file_ext"`
+  file_ext=`echo "$file_ext" | tr '[:upper:]' '[:lower:]'`
+
+  if [ ! -f "$file_name" ]; then
+    echo
+    echo "file $file_name don't exists" >&2
+    exit 1
+  fi
+
+  case "$file_ext" in
+    tgz)
+      mv "$file_name" "$file_rest".tar.gz
+      file_name="$file_rest".tar.gz
+    ;;
+    tbz2)
+      mv "$file_name" "$file_rest".tar.bz2
+      file_name="$file_rest".tar.bz2
+    ;;
+    gz)
+      gzip -d "$file_name"
+      file_name="$file_rest"
+    ;;
+    z)
+      uncompress "$file_name"
+      file_name="$file_rest"
+    ;;
+    bz2)
+      bzip2 -d "$file_name"
+      file_name="$file_rest"
+    ;;
+    tar)
+      mkdir "$file_rest"
+      cd "$file_rest"
+      tar -xf ../$file_name && rm ../$file_name
+      nbFiles=`ls | wc -l`
+      if [ $nbFiles -eq 1 ]; then
+        file_name=`ls`
+        cd ..
+        dirName=toSupress.$RANDOM.$(date +%S%s)
+        mv "$file_rest" $dirName
+        mv $dirName/* .
+        rmdir $dirName
+      else
+        #more than one file, end
+        break
+      fi
+    ;;
+    zip)
+      mkdir "$file_rest"
+      cd "$file_rest"
+      unzip -q ../$file_name && rm ../$file_name
+      nbFiles=`ls | wc -l`
+      if [ $nbFiles -eq 1 ]; then
+        file_name=`ls`
+        cd ..
+        dirName=toSupress.$RANDOM.$(date +%S%s)
+        mv "$file_rest" $dirName
+        mv $dirName/* .
+        rmdir $dirName
+      else
+        #more than one file, end
+        break
+      fi
+    ;;
+    *) break ;; #no known extention, finish
+  esac
+
+done
+
+echo
+
+#__EOF__

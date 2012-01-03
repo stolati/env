@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+error(){ #<msg>
+  echo "$1"
+  exit 1
+}
+
+
+
+#declare the default variables
+PROJECT_DIRECTORY=~/project
+ARCHIVE_DIRECTORY=~/project/archived
+TIMEOUT_PROJECT=30
+ARCHIVE_NAME='${CLOSE_DATE}_${NAME}'
+PROJECT_DIR_NAME='${NAME}'
+DATE_FORMAT='%Y-%m-%d'
+INIT_CODE='mkdir 01_origin ; echo "#!/usr/bin/env bash" > launch.bash ; chmod u+x launch.bash'
+
+#load the project file if exists
+[ -e '~/project' ] && . ~/project
+
+#in case they don't exists
+mkdir -p "$PROJECT_DIRECTORY" "$ARCHIVE_DIRECTORY"
+cd "$PROJECT_DIRECTORY" #it's easier to think inside the dir
+
+#check which command is launched
+case "$1" in
+  new)
+    OPEN_DATE=`date +$DATE_FORMAT`
+    NAME="$2"
+    [ -z "$NAME" ] && error "project new <project_name>"
+    pro_path="`eval echo $PROJECT_DIR_NAME`"
+    [ -d "$pro_path" ] && error "project already exists"
+
+    echo "Enter the project short description :"
+    read desc
+
+    mkdir "$pro_path"
+    cd "$pro_path"
+
+    {
+      echo "project name : $NAME"
+      echo "project creation date : $OPEN_DATE"
+      echo "project description :$desc"
+    } > README.txt
+
+    eval "$INIT_CODE"
+    echo "project $NAME created in $PROJECT_DIRECTORY/$pro_path" ;;
+
+  close)
+    NAME="$2"
+    [ -z "$NAME" ] && error "project close <project_name>"
+
+    readme=
+    for r in `ls */README.txt`; do
+      tmpName="`cat $r | grep 'project name' | head -1 | cut -d: -f2 | cut -c2-`"
+      [ "$tmpName" != "$NAME" ] && continue
+      readme="$r"
+      break
+    done
+    [ -z "$readme" ] && error "no project with the name [$NAME] found"
+    OPEN_DATE="`cat $r | grep 'project creation date' | head -1 | cut -d: -f2 | cut -c2-`"
+    CLOSE_DATE=`date +$DATE_FORMAT`
+    echo "project closing date : $CLOSE_DATE" >> "$readme"
+
+    pro_dir=`dirname $readme`
+    archName=`eval echo $ARCHIVE_NAME`
+    archFile="$ARCHIVE_DIRECTORY/$archName.tbz2"
+
+    echo "$NAME/$archName" >> "$ARCHIVE_DIRECTORY/project.lst"
+    [ -f "$archFile" ] && error "archive file [$archFile] already exists"
+    tar -cvf - "$pro_dir" | bzip2 > "$archFile"
+    rm -Rf "$pro_dir"
+
+    echo "project $NAME archived in [$archFile]"
+  ;;
+  *)
+    echo "project new <project_name>"
+    echo "project close <project_name>"
+    exit 1
+esac
+
+#newagain : get an old project new again
+      #put the opened in the readme
+      #ask for a new definition on it
+
+#clean : archive old projects
+      #all the project too old are closed
+      # --ask : ask yes or no for each project
+      # --no--ask :
+
+#list : like an ls, with others informations on each projects
+     # -a all infos
+     # -c creation date
+     # -m last modification date
+     # -s size
+     # -o include old projects
+
+

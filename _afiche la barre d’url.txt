@@ -1,0 +1,206 @@
+commandes vimperator interressantes
+
+
+
+"afiche la barre d’url
+set guioptions+=n
+
+" mode d’affichage des onglets (1=que si plus d’un onglet est ouvert)
+set showtabline=1
+
+"dans quel sens les autocompletions sont-elles proposées
+set complete=slf
+
+" permet de visualiser les résultats de la awsomebar avec :open et :tab 
+set wildoptions=auto
+
+" comportement de la completion
+set wildmode=list:longest,list:full
+
+"Charge l’historique au démarage pour augmenter la vitesse de la completion
+set preload
+
+"visualbell
+set visualbell
+
+" comportement le de la case lors de la recherche
+set ignorecase
+set smartcase
+
+" une fois qu’une page est chargée, ne pas aller automatiquement dans les champs de saisie
+set focuscontent
+
+" deffinie quelles commandes sont ouvertes dans un nouvel onglet
+"set newtab=all
+
+" Colore la barre du bas quand elle a le focus
+"javascript <<EOM
+"(function(){
+"var inputElm = document.getElementById('liberator-commandline-command');
+"function swapBGColor(event){
+"  inputElm.parentNode.style.backgroundColor = event.type=="focus" ?
+"yellow" : "";
+"}
+"inputElm.addEventListener('focus',swapBGColor,false);
+"inputElm.addEventListener('blur', swapBGColor,false);
+"})();
+"EOM
+
+" désactive vimpérator dans gmail, greader, gcalendar
+:autocmd LocationChange .* :fmapc
+:autocmd LocationChange mail\\.google\\.com/mail :fmap -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
+:autocmd LocationChange www\\.google\\.com/reader :fmap! -vkey j k n p m s t v A r S N P X O gh ga gs gt gu u / ?
+
+" dit a vim, quand on édite depuis gmail, que le contenu est un courriel
+"au LocationChange .* :set editor=gvim -f
+"au LocationChange mail\.google\.com :set editor=gvim -f -c 'set ft=mail'
+
+
+"Pour « [[ » et « ]] » permet de les faire fonctionner en Français
+"Ajout de précédent/suivant
+set nextpattern=\bnext|suivant\b,^>$,^(>>|»)$,^(>|»),(>|»)$,\bmore\b
+set previouspattern=\bprev|previous|précédent\b,^<$,^(<<|«)$,^(<|«),(<|«)$
+
+"Montre l’icône rss dans la « statusbar » même si il n’y a pas de barre d’adresse
+javascript <<EOF
+(function(){
+    var feedPanel = document.createElement("statusbarpanel");
+    feedPanel.setAttribute("id", "feed-panel-clone");
+    feedPanel.appendChild(document.getElementById("feed-button"));
+    feedPanel.firstChild.setAttribute("style", "padding: 0; max-height: 16px;");
+    document.getElementById("status-bar")
+            .insertBefore(feedPanel, document.getElementById("security-button"));
+})();
+EOF
+
+" {W} -> [É]
+" ——————————
+" Le placement de {W} est catastrophique, mais ça se soigne ;-)
+noremap é w
+noremap É W
+" Pour faciliter les manipulations de fenêtres, on utilise {W} comme un Ctrl+W :
+noremap w <C-w>
+noremap W <C-w><C-w>
+
+" [HJKL] -> {CTSR}
+" ————————————————
+" {cr} = « gauche / droite »
+noremap c h
+noremap r l
+" {ts} = « haut / bas »
+noremap t j
+noremap s k
+" {CR} = « haut / bas de l'écran »
+noremap C H
+noremap R L
+" {TS} = « joindre / aide »
+noremap T J
+noremap S K
+
+" {HJKL} <- [CTSR]
+" ————————————————
+" {J} = « Jusqu'à »            (j = suivant, J = précédant)
+noremap j t
+noremap J T
+" {L} = « Change »             (h = bloc, H = jusqu'à la fin de ligne)
+noremap l c
+noremap L C
+" {H} = « Remplace »           (l = caractère, L = texte)
+noremap h r
+noremap H R
+" {K} = « Supprime et insère » (k = caractère, K = ligne)
+noremap k s
+noremap K S
+
+" Désambiguation de {g}
+" —————————————————————
+" ligne précédante/suivante (à l'intérieur d'une phrase)
+noremap gs gk
+noremap gt gj
+" onglet précédant/suivant
+noremap gb gT
+noremap gé gt
+" premier/dernier onglet
+"noremap gB :exe "silent! tabfirst"<CR>
+"noremap gÉ :exe "silent! tablast"<CR>
+
+"pour que mon apostrophe courbe soit reconnue comme droite
+"noremap ’ ' "ne fonctionne pas
+
+" Chiffres en accès direct /!\ pas utilisé depuis que j’ai les chiffres en accès direct
+" ————————————————————————
+"cmap 0 "
+"cmap 1 <
+"cmap 2 >
+"cmap 3 (
+"cmap 4 )
+"cmap 5 [
+"cmap 6 ]
+"cmap 7 /
+"cmap 8 * 
+"cmap 9 =
+"cmap " 0
+"cmap < 1
+"cmap > 2
+"cmap ( 3
+"cmap ) 4
+"cmap [ 5
+"cmap ] 6
+"cmap / 7
+"cmap * 8
+"cmap = 9
+
+noremap <BS> <C-u>
+noremap <Space> <C-d>
+noremap <Return> zz
+
+" va a l’onglet suivant/précédent
+map <Left> gb
+map <Right>  gé
+map E   gé
+map I   gb
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+:set wildoptions=auto
+:set cpt=l 
+
+
+
+
+
+"Turn the menu and toolbar on.
+ :set guioptions+=mT
+ 
+ "Turn off the show tabs by default.
+ :set showtabline=1
+ 
+ "Turn session tracking off.
+ :set! browser.startup.page=1
+ 
+ "Allow user to click in address bar.
+ :set! browser.urlbar.clickSelectsAll=true
+ :set! browser.urlbar.doubleClickSelectsAll=true
+ 
+ "Map Ctrl + n for new windows
+ :map <C-n> <C-v><C-n>
+ 
+ "Map Ctrl + t for new tabs
+ :map <C-t> :tabopen<Enter>
+ 
+ "Map paste operation normally.
+ :imap <C-v> <C-v> 
+ 
+ 
+

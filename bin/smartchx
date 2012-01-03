@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+
+impressMe(){ #<file>
+  typeset f="$1"
+  if [ ! -d "`dirname '$f'`" ] ; then
+    echo "Directory `dirname '$f'` don't exists" >&2
+    return
+  fi
+
+  if [ -f "$f" ]; then
+    chmod u+x "$f"
+    return
+  fi
+
+  ext="${f##*.}"
+
+  case "$ext" in
+    py)    cmd='python'    ;;
+    sh)    cmd='sh'        ;;
+    bash)  cmd='bash'      ;;
+    ksh)   cmd='ksh'       ;;
+    rb)    cmd='ruby'      ;;
+    con)   cmd='stream'    ;;
+    awk)   cmd='awk'       ;;
+    sed)   cmd='sed'       ;;
+    pl)    cmd='perl'      ;;
+    scala) cmd="scala\n!#" ;;
+    *)
+      printf "Put the command for the file '$f' [default $ext]: "
+      read cmd
+      ;;
+  esac
+
+  printf "#!/usr/bin/env ${cmd:$ext}" > "$f"
+  chmod u+x "$f"
+}
+
+
+if [ $# -eq 0 ]; then
+  impressMe launch.bash
+fi
+
+while [ $# -ne 0 ]; do
+  impressMe "$1"
+  shift
+done
+
+exit 0
+#__EOF__

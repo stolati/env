@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#create an emtpy file with an exention
+#from an existing (or not) file
+
+#first parameter is the extention to add
+#every others are file names
+
+ext="${1}"
+shift
+
+if [ "$ext" == "-h" ]; then
+  echo "Create empty files with extention"
+  echo "touchext <extention> <files...>"
+  exit
+fi
+
+while [ $# -ne 0 ]; do
+  touch "${1}${ext}"
+  shift
+done
+
+#__EOF__

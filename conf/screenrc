@@ -1,0 +1,57 @@
+
+shell -$SHELL
+#shelltitle ''
+defscrollback 10000
+startup_message off
+hardstatus on
+hardstatus alwayslastline
+
+deflogin on
+
+# Look and feel
+#caption always "%{= bb}%{+b w}Screen: %n | %h %=%t %c"
+#
+#
+#
+#hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%<"
+
+# Our warning of activity
+activity "Activity in %t(%n)"
+
+# Left Right meta key mods
+#ALT-,. and ALT-<>
+bindkey "^[<" eval number !echo $WINDOW-1|bc
+bindkey "^[>" eval number !echo $WINDOW+1|bc
+bindkey "^[," prev
+bindkey "^[." next
+
+#Ctrl-a " become Ctrl-a ' '
+bind ' ' windowlist -b
+bind = resize =
+
+
+#autoindent in vi
+register [ "\033:se noai\015a"
+register ] "\033:se ai\015a"
+bind ^] paste [.]
+
+#change the escape command
+#escape ^[a
+#escape "\M-c"
+
+#hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%< %=%D %M %d %c"
+hardstatus string '%{= kK}%-Lw%{= KW}%50>%n%f %t%{= kK}%+Lw%< %{=kG}%-= %d%M %c:%s%{-}'
+#hardstatus string '%{= kg}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{=b kR}(%{W}%n*%f %t%?(%u)%?%{=b kR})%{= kw}%?% Lw%?%?%= %{g}]%{=b C}[ %d %M %c ]%{W}'
+
+#build my usual screen use
+split
+resize =
+screen -t '^'
+screen -t '^'
+focus down
+screen -t 'v'
+screen -t 'v'
+focus up
+
+
+#__EOF__

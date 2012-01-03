@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+case "$1" in
+  fg_black)   tput setaf 0 || printf '\e[0;30m' ;;
+  fg_red)     tput setaf 1 || printf '\e[0;31m' ;;
+  fg_green)   tput setaf 2 || printf '\e[0;32m' ;;
+  fg_yellow)  tput setaf 3 || printf '\e[0;33m' ;;
+  fg_blue)    tput setaf 4 || printf '\e[0;34m' ;;
+  fg_magenta) tput setaf 5 || printf '\e[0;35m' ;;
+  fg_cyan)    tput setaf 6 || printf '\e[0;36m' ;;
+  fg_white)   tput setaf 7 || printf '\e[0;37m' ;;
+  bg_black)   tput setab 0 || printf '\e[0;30m' ;;
+  bg_red)     tput setab 1 || printf '\e[0;31m' ;;
+  bg_green)   tput setab 2 || printf '\e[0;32m' ;;
+  bg_yellow)  tput setab 3 || printf '\e[0;33m' ;;
+  bg_blue)    tput setab 4 || printf '\e[0;34m' ;;
+  bg_magenta) tput setab 5 || printf '\e[0;35m' ;;
+  bg_cyan)    tput setab 6 || printf '\e[0;36m' ;;
+  bg_white)   tput setab 7 || printf '\e[0;37m' ;;
+  reset)      tput sgr0    || printf '\e[0m'    ;;
+esac
+
+#__EOF__
