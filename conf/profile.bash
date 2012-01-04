@@ -1,22 +1,21 @@
 #!/usr/bin/env bash
 
 #configuration
-ACTIVE_HISTORY=false #true
+ACTIVE_HISTORY=${ACTIVE_HISTORY:-false} #true
 
-#set -u #unbound variable (no more used, because it kill completion on some envs
+
 export et="${et:-`pwd`}" #home path (E.T. phone home)
-
 export bin="$et/env/bin"
 
 ###########################
 # Bash environment
 ###########################
 
-chmod a+x $et/env/bin/*
-export PATH=".:$PATH:$et/env/bin"
+chmod a+x $bin/* #just to be sure
+export PATH=".:$PATH:$bin"
 export CDPATH="${CDPATH:-}:$et"
 
-export SHELL="$et/env/bin/shell"
+export SHELL="$bin/shell" #shell here is 
 
 set show-all-if-ambiguous on #show completion instead of bell
 set horizontal-scroll-mode on #dont wrap when line is too long
@@ -28,7 +27,8 @@ export TERM=xterm ; tput init #screen is not known everywhere
 set -o ignoreeof  #^D dont exit
 set -o noclobber  #dont overwrite when doing file redirection
 #this is no set (even if it's great) because completion code give an error ( on some "exclude" variable )
-#set -o nounset    #err when use unset variable
+#set -o nounset #same as set -u   #err when use unset variable
+#but on all your scripts, you should use "set -eux"
 
 shopt -s cdspell #correct small typo in paths
 #shopt -s histappend #append history when close, dont ovewrite
@@ -40,10 +40,10 @@ if $ACTIVE_HISTORY; then
 
   HISTSIZE=100000
   HISTFILESIZE=${HISTSIZE}00
-  PROMPT_COMMAND="history -a" #write the previous line to disk each time
+  PROMPT_COMMAND="history -a" #write the previous line to disk each time we hit enter
   HISTCONTROL="ignoreboth" #duplicates / begin by space
-  HISTFILE="$et/env/generated/bash_history_$(date +%Y%m%d)"
-  HISTIGNORE='a:b:c:d:e:f:g:h:i:j:k:l:m:o:p:q:r:s:t:u:v:w:x:y:z' #ignore ls, bg, fg, exit and duplicate
+  HISTFILE="$et/bash_history_file.hist"
+  HISTIGNORE= #'a:b:c:d:e:f:g:h:i:j:k:l:m:o:p:q:r:s:t:u:v:w:x:y:z' #ignore ls, bg, fg, exit and duplicate
   #TODO create a hist command, for history interrogation
   #alias histAllTime='cat $HISTFILE | sort | uniq -c | sort | head -100'
   #alias histCmd="cat $HISTFILE | cut -d' ' -f1 | sort | uniq -c | sort | head -100"
@@ -58,12 +58,9 @@ fi
 
 #adding colors
 export CLICOLOR=1
-
-#set the PS1_COLOR in the specialized scripts
 export PS1_RESET="`term_color reset`"
-#to set by the others scripts
-
 PS1='\[$PS1_COLOR\]$?/\D{%H%M%S}:\u@\h\w>\[$PS1_RESET\] '
+#PS1_COLOR will be set at the end of this script
 
 #python
 export PYTHONDONTWRITEBYTECODE=true
@@ -76,12 +73,12 @@ export PYTHONPATH="${PYTHONPATH:-}:$et/env/lib/python"
 git config --global user.name "Stolati"
 git config --global user.email "stolati@gmail.com"
 
-
 ###########################
 # VIM commands
 ###########################
 
-#EDITOR="vim -u $et/env/conf/vimrc -i $et/env/generated/viminfo -n"
+#-i /dev/null (instead of viminfo) is where vim put its informations (so when we open a file again, some place are kepts)
+#-n is for no swap file
 EDITOR="vim -u $et/env/conf/vimrc -i /dev/null -n"
 
 #bash mode vi
@@ -93,29 +90,91 @@ bind -m vi-insert "\C-p":dynamic-complete-history # ^p check for partial match i
 bind -m vi-insert "\C-n":menu-complete # ^n cycle through the list of partial matches
 bind -m vi-insert "\C-l":clear-screen # ^l clear screen
 
-#editor command
-
 
 ###########################
 # Aliases
 ###########################
 
+#the principle is to have a maximum of 1 char aliases
+#so each time you have to type more than 1 char command, there is a problem
+#(because, you can do a lot with 26 smarts commands)
+
 #reserved by bash:
 #! case do done elif else esac fi for function if in select then until while { } time [[ ]]
 
+#a=
+#b=
+#c= change dir (if dir), edit files (if files), goto home (if empty)
+#d=
+#e=
+#f= find in the current path (regular expression), can have multiples args, default return all
+#g= egrep , use -i if only minusclule (like my vim search)
+#h=
+#i=
+#j=
+#k=
+#l= ls -lrth
+#m=
+#n=
+#o=
+#p=
+#q= exit
+#r= rm
+#s= start a new subshell
+#t= try to launch exe like launch.bash, launch.*, launch
+#u=
+#v=
+#w= watch that take my aliases, empty "l" (ls -lrth)
+#x= create exe (if not exists), set executable (if exists), empty => launch.bash
+#y=
+#z=
+
+
 #alias a=
 #alias b=
-alias c='$CD'
+c(){ #[<path>|<files ...>]
+  typeset param="${1:-$et}"
+
+  if [[ -d "$param" ]]; then
+    cd "$param"
+    $LS
+  elif [[ -f "$param" ]]; then
+   $EDITOR "$@"
+  #try to guess
+  elif cd "$param" 2>/dev/null ; then
+    #autocorrection worked for the cd
+    $LS
+  else
+    $EDITOR "$@"
+  fi
+}
 #alias d=
-alias e=profile_editor_smartLaunch
-alias f=profile_utils_smartFind
-alias g='egrep --color'
+#alias e=
+f(){ #<patterns> ...
+  typeset patt
+  while [[ $# -gt 0 ]]; do
+    [[ -z "$patt" ]] && patt="($1)" || patt="$patt|($1)"
+   shift
+  done
+
+  find . | g "$patt" #if we want it faster, use plain find
+}
+g(){ #[-v] <pattern> [<files>]
+  typeset v
+  [[ "$1" = "-v" ]] && v="-v" && shift
+
+  typeset i
+  typeset min="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  [[ "$1" = "$min" ]] && i="-i"
+
+  egrep $v $i --color "$1"
+}
 #alias h=
 #alias i=
 #alias j=
 #alias k=
 alias l='$LS'
-alias m="./launsh.bash"
+#alias m=
 #alias n=
 #alias o=
 alias p="profile_utils_dirqueue" #push a
@@ -123,8 +182,8 @@ alias q=exit
 #r(){ echo "$*" | bc ;}
 alias r='rm'
 alias rr='rm -rf --'
-alias s=shell
-alias t="./launch.bash"
+alias s=shell                                  #s = launch a new shell
+t(){ [[ -e "launch.bash" ]] && launch.bash || $(ls launch.* | head -1) ; }   #t = launch bash files, or other launch file
 #alias u=
 w(){ profile_utils_watch "${@:-l}" ; } #watch, l by default
 #alias v=
@@ -161,14 +220,24 @@ alias EOF='touchext _EOF'
 #TODO mix cd and e into e
 
 
+#an egrep, case if contain MAJ, else no case
+#profile_smartGrep(){ #<patt> <files>
+#
+#
+#
+#
+#   egrep --color 
+#}
+
+
+
+
 
 ###########################
 # change dir
 ###########################
 
 #!/usr/bin/env bash
-
-CD=profile_editor_smartCd
 
 gen_cmd(){ #<command> <last command values> <parameters>
   typeset cmd="$1" param="$2"
@@ -182,23 +251,6 @@ gen_cmd(){ #<command> <last command values> <parameters>
 
 LS=$(gen_cmd ls / -l -F -G --color=auto --group-directories-first)
 
-
-
-
-#function
-#try to cd, if it's a file launch editor instead
-profile_editor_smartCd(){
-  #only take the first argument
-  #the others are for the decoration
-  typeset newPath="${1:-$et}"
-  if [ -f "$newPath" ]; then
-    #if it's a file, maybe we want to edit it
-    $EDITOR "$@"
-  else
-    cd "$newPath"
-    $LS
-  fi
-}
 
 #TODO try to push the directory into the dirqueue
 #TODO and then have c and - with more than 2 values
@@ -227,16 +279,16 @@ profile_editor_smartCd(){
 
 #alias up to 10 level
 #so i don't have to count when moving
-alias ..='$CD ..'
-alias ...='$CD ../..'
-alias ....='$CD ../../..'
-alias .....='$CD ../../../..'
-alias ......='$CD ../../../../..'
-alias .......='$CD ../../../../../..'
-alias ........='$CD ../../../../../../..'
-alias .........='$CD ../../../../../../../..'
-alias ..........='$CD ../../../../../../../../..'
-alias ...........='$CD ../../../../../../../../../..'
+alias ..='c ..'
+alias ...='c ../..'
+alias ....='c ../../..'
+alias .....='c ../../../..'
+alias ......='c ../../../../..'
+alias .......='c ../../../../../..'
+alias ........='c ../../../../../../..'
+alias .........='c ../../../../../../../..'
+alias ..........='c ../../../../../../../../..'
+alias ...........='c ../../../../../../../../../..'
 
 
 
@@ -257,17 +309,6 @@ set convert-meta on
 bind -m vi-insert "\C-p":dynamic-complete-history # ^p check for partial match in history
 bind -m vi-insert "\C-n":menu-complete # ^n cycle through the list of partial matches
 bind -m vi-insert "\C-l":clear-screen # ^l clear screen
-
-#editor command
-profile_editor_smartLaunch(){
-  if [ -z "$*" ];then
-    $EDITOR -
-  elif [ -d "$*" ]; then
-    $CD "$@"
-  else
-    $EDITOR "$@"
-  fi
-}
 
 
 #edit programm in the path
@@ -362,11 +403,6 @@ profile_utils_watch(){
   done
 }
 
-#smart find
-#TODO make it smarter
-profile_utils_smartFind(){
-  find . -name "*${@}*"
-}
 
 #configuration for pentadactyl
 export PENTADACTYL_INIT=":source \"$et/env/conf/pentadactyl.conf\""
@@ -460,6 +496,14 @@ export SCREEN_SIZE="${SCREEN_SIZE:-150x51}"
 
 
 
+###########################
+# Test program files (only if there is no config yet)
+###########################
+
+#for cmd in $(sed 's/#.*$//g' "$et/env/conf/exe_exists.lst"); do
+#  which $cmd >/dev/null 2>&1 && continue
+#  echo "!!! $cmd is not found in this environment, you migth whant to add it !!!"
+#done
 
 
 

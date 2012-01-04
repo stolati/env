@@ -1,0 +1,26 @@
+#basic utils
+ls rm which file wc
+tail head tr cut paste
+grep egrep fgrep
+more cat tac less
+scp ssh
+df du ps hostname file
+basename dirname
+date env
+chmod chown touch
+
+#languages
+ruby python perl
+bash zsh ksh #csh
+java gcc #scala
+awk gawk sed ed
+
+#code
+screen rxvt git vim
+svn git
+
+#format
+tar gzip uncompress bzip2 unzip
+p7zip cabextract
+
+#__EOF__

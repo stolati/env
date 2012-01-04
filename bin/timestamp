@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+#check first if date have the %s routine
+date +%s 2>/dev/null && exit
+
+#go back on perl
+perl -e "print localtime" ; echo
+
+#__EOF__

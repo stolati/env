@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-#bash for user me@Robert
-TYPE_ENV=dev
-SCREEN_SIZE=318x76
+#bash for user me@robert
+TYPE_ENV= #dev|prod|re7
 
 #__EOF__

@@ -1,0 +1,11 @@
+#basic utils
+ls rm which
+wc grep tail head
+scp ssh
+
+#interpretor
+ruby bash python
+
+#code
+screen rxvt gcc git vim
+svn
