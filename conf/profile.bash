@@ -129,6 +129,16 @@ bind -m vi-insert "\C-l":clear-screen # ^l clear screen
 #y=
 #z=
 
+#try to make t a universal launcher
+# use t with parameters to set a launcher (./launch.bash by default) and/or have parameters
+# use t alone for launching
+# t try to launch the file event if it's not executable
+#  - python if end by .py or pyc or pyo
+#  - perl, bash, java -jar, scala, etc ...
+
+# d for compression or decompressing
+# d zip toto => compress toto
+# d something => decompress it if in a compressed format, compress it otherwise
 
 #alias a=
 #alias b=
