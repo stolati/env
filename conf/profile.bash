@@ -13,6 +13,13 @@ export conf="$et/env/conf"
 str_lower(){ echo "$*" | tr '[:upper:]' '[:lower:]' ; }
 str_upper(){ echo "$*" | tr '[:lower:]' '[:upper:]' ; }
 pass(){ echo > /dev/null ; } #do nothing
+args_toEvaluatedVar(){ #args ...
+  while [[ $# -ne 0 ]]; do
+    printf '%s' "\"$(echo "$1" | sed 's/"/\\"/g')\" "
+    shift
+  done
+  echo
+}
 
 ###########################
 # Bash environment
@@ -129,7 +136,7 @@ bind -m vi-insert "\C-l":clear-screen # ^l clear screen
 #q= exit
 #r= rm
 #s= start a new subshell
-#t= try to launch exe like launch.bash, launch.*, launch
+#t= t <prog> = set the prog as test (with parameters) and launch it, t = launch the setted prog, default = ./launch.bash
 #u=
 #v=
 #w= watch that take my aliases, empty "l" (ls -lrth)
@@ -153,16 +160,16 @@ bind -m vi-insert "\C-l":clear-screen # ^l clear screen
 c(){ #[<path>|<files ...>]
   typeset param="${1:-$et}"
 
-  if [[ -d "$param" ]]; then
+  if [[ -d "$param" ]]; then #moving to the parameter
     cd "$param"
     $LS
-  elif [[ -f "$param" ]]; then
+  elif [[ -f "$param" ]]; then #editing the parameters
    $EDITOR "$@"
   #try to guess
-  elif cd "$param" 2>/dev/null ; then
+  elif cd "$param" 2>/dev/null ; then #use the bash guess system
     #autocorrection worked for the cd
     $LS
-  else
+  else #try to edit it (and create the file before that)
     $EDITOR "$@"
   fi
 }
@@ -208,7 +215,10 @@ alias q=exit
 alias r='rm'
 alias rr='rm -rf --'
 alias s=shell                                  #s = launch a new shell
-t(){ [[ -e "launch.bash" ]] && launch.bash || $(ls launch.* | head -1) ; }   #t = launch bash files, or other launch file
+t(){
+  [[ $# -gt 0 ]] && shortcut_t_setted_prog="$(args_toEvaluatedVar "$@")"
+  eval "${shortcut_t_setted_prog:-./launch.bash}"
+}
 #alias u=
 w(){ profile_utils_watch "${@:-l}" ; } #watch, l by default
 #alias v=

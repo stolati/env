@@ -9,6 +9,7 @@ basename dirname
 date env
 chmod chown touch
 shuf
+wget
 
 #languages
 ruby python perl
