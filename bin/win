@@ -35,23 +35,24 @@ rxvt \
 -vb \
 +sb \
 -sl 0 \
--geometry $screen_size \
---color1 red \
---color2 rgb:72/A0/32 \
---color4 skyblue \
---color3 yellow \
---color5 magenta \
---color6 rgb:20/C0/A0 \
---color7 rgb:C0/C0/C0 \
---color9 red \
---color10 rgb:72/A0/32 \
---color12 skyblue \
---color11 yellow \
---color13 magenta \
---color14 rgb:20/C0/A0 \
---color15 rgb:C0/C0/C0 \
---colorBD rgb:C0/C0/C0 \
+-geometry "$screen_size" \
+--color1 "red" \
+--color2 "rgb:72/A0/32" \
+--color4 "skyblue" \
+--color3 "yellow" \
+--color5 "magenta" \
+--color6 "rgb:20/C0/A0" \
+--color7 "rgb:C0/C0/C0" \
+--color9 "red" \
+--color10 "rgb:72/A0/32" \
+--color12 "skyblue" \
+--color11 "yellow" \
+--color13 "magenta" \
+--color14 "rgb:20/C0/A0" \
+--color15 "rgb:C0/C0/C0" \
+--colorBD "rgb:C0/C0/C0" \
 -e $screen_launch \
 &
+echo $screen_launch
 
 #__EOF__

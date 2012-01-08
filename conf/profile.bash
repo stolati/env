@@ -23,7 +23,7 @@ export PATH=".:$PATH:$bin"
 export CDPATH="${CDPATH:-}:$et"
 
 export SHELL="$bin/shell" #shell here is
-export SCREEN="$bin/screen"
+export SCREEN="$bin/my_screen"
 
 set show-all-if-ambiguous on #show completion instead of bell
 set horizontal-scroll-mode on #dont wrap when line is too long
@@ -196,9 +196,9 @@ alias l='$LS'
 #alias n=
 o(){
   case "$env_type" in
-    win) explorer "$@" ;;
-    lux) nautilus "$@" ;;
-    mac) open "$@" ;;
+    win) explorer "${@:-.}" ;;
+    lux) nautilus "${@:-.}" ;;
+    mac) open "${@:-.}" ;;
     *) echo "Your environment is not defined";;
   esac
 }

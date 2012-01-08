@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-screen -c "$conf/screenrc" -a
-
-#__EOF__
