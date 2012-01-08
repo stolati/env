@@ -8,12 +8,13 @@ df du ps hostname file
 basename dirname
 date env
 chmod chown touch
+shuf
 
 #languages
 ruby python perl
 bash zsh ksh #csh
 java gcc #scala
-awk gawk sed ed
+awk gawk sed ed bc
 
 #code
 screen rxvt git vim

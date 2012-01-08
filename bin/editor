@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+vim -u "$conf/vimrc" -i /dev/null -n -X "$@"
+
+#__EOF__
