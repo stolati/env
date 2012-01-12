@@ -249,7 +249,9 @@ alias eof='touchext .eof'
 alias EOF='touchext _EOF'
 
 -(){ c - ; }
-?(){ echo "$*" | bc -l ; }
+#because ?(){ echo "$*" | bc -l ; } crash the profile sometimes
+calcul(){ echo "$*" | bc -l ; }
+alias ?=calcul
 
 ###########################
 # change dir
