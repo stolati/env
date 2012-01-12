@@ -53,6 +53,5 @@ rxvt \
 --colorBD "rgb:C0/C0/C0" \
 -e $screen_launch \
 &
-echo $screen_launch
 
 #__EOF__
