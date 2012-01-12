@@ -83,12 +83,6 @@ export PYTHONNOUSERSITE=true
 export PYTHONPATH="${PYTHONPATH:-}:$et/env/lib/python"
 
 ###########################
-# Git setup
-###########################
-git config --global user.name "Stolati"
-git config --global user.email "stolati@gmail.com"
-
-###########################
 # VIM settings
 ###########################
 
