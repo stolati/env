@@ -3,3 +3,12 @@ all my configuration should be here
 
 There should only be here public informations,
 no private key, no password or ip adress
+
+To me load :
+ - aptitude install git ssh
+ - ssh-keygen -t rsa -C "stolati@gmail.com"
+ - git config --global user.name "Mickael Kerbrat"
+ - git config --global user.email "stolati@gmail.com"
+ - cat ~/.ssh/id_rsa.pub
+ - put the paste into git stuff
+ - git clone git@github.com:stolati/env.git
