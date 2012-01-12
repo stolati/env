@@ -2,6 +2,9 @@
 "" basic vimrc file for mickael Kerbrat                   ""
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" cause I always made the mistake
+command W w
+
 " Set off unexpected things and reset options
 set nocompatible
 

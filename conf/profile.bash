@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #configuration
-ACTIVE_HISTORY=${ACTIVE_HISTORY:-false} #true
+ACTIVE_HISTORY=true
 
 export et="${et:-`pwd`}" #home path (E.T. phone home)
 export bin="$et/env/bin"
@@ -57,8 +57,8 @@ if $ACTIVE_HISTORY; then
   HISTFILESIZE=${HISTSIZE}00
   PROMPT_COMMAND="history -a" #write the previous line to disk each time we hit enter
   HISTCONTROL="ignoreboth" #duplicates / begin by space
-  HISTFILE="$et/bash_history_file.hist"
-  HISTIGNORE= #'a:b:c:d:e:f:g:h:i:j:k:l:m:o:p:q:r:s:t:u:v:w:x:y:z' #ignore ls, bg, fg, exit and duplicate
+  HISTFILE="$et/bash_$(date +%Y%m)_.hist"
+  #HISTIGNORE= #'a:b:c:d:e:f:g:h:i:j:k:l:m:o:p:q:r:s:t:u:v:w:x:y:z' #ignore ls, bg, fg, exit and duplicate
   #TODO create a hist command, for history interrogation
   #alias histAllTime='cat $HISTFILE | sort | uniq -c | sort | head -100'
   #alias histCmd="cat $HISTFILE | cut -d' ' -f1 | sort | uniq -c | sort | head -100"
