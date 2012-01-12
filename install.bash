@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
 testFile(){ #<file>
-  if [ -f "$1" ]; then
+  typeset file="$1"
+  typeset newName="${file}_old_$(date +%Y%m%d_%H%M%S)"
+  if [ -f "$file" ]; then
     echo "Already exist : [$1]"
+    echo "moving to $newName"
+    mv "$file" "$newName"
   else
     echo "Install : Creating [$1]"
   fi
 
-  test ! -f "$1"
+  true
 }
 
 echo 'Give your $et [default : '`pwd`']'
