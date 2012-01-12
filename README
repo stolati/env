@@ -12,3 +12,4 @@ To me load :
  - cat ~/.ssh/id_rsa.pub
  - put the paste into git stuff
  - git clone git@github.com:stolati/env.git
+ - ./env/install.bash
