@@ -19,7 +19,7 @@ awk gawk sed ed bc
 
 #code
 screen rxvt git vim
-svn git
+svn git hg
 
 #format
 tar gzip uncompress bzip2 unzip
