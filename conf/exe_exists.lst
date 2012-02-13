@@ -11,6 +11,9 @@ chmod chown touch
 shuf
 wget
 
+#ncurses
+tput
+
 #languages
 ruby python perl
 bash zsh ksh #csh
