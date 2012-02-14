@@ -2,7 +2,7 @@
 ls rm which file wc
 tail head tr cut paste
 grep egrep fgrep
-more cat tac less
+cat tac less
 scp ssh
 df du ps hostname file
 basename dirname
@@ -10,6 +10,9 @@ date env
 chmod chown touch
 shuf
 wget
+
+#util-linux
+more
 
 #ncurses
 tput
@@ -21,8 +24,9 @@ java gcc #scala
 awk gawk sed ed bc
 
 #code
-screen rxvt git vim
-svn git hg
+screen rxvt
+vim emacs
+svn git hg git
 
 #format
 tar gzip uncompress bzip2 unzip
