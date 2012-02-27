@@ -18,7 +18,7 @@ more
 tput
 
 #languages
-ruby python perl
+ruby python perl tcl
 bash zsh ksh #csh
 java gcc #scala
 awk gawk sed ed bc
