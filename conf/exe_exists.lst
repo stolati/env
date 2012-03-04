@@ -18,10 +18,11 @@ more
 tput
 
 #languages
-ruby python perl tcl
+ruby python perl
 bash zsh ksh #csh
 java gcc #scala
 awk gawk sed ed bc
+wish #tcl
 
 #code
 screen rxvt
