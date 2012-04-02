@@ -193,19 +193,19 @@ g(){ #[-v] <pattern> [<files>]
 #alias j=
 #alias k=
 alias l='$LS'
-#alias m=
+alias m=git
 #alias n=
 o(){
   case "$env_type" in
-    win) explorer "${@:-.}" ;;
-    lux) nautilus "${@:-.}" ;;
+    win) cygstart "${@:-.}" ;;
+    lux) gnome-open "${@:-.}" ;;
+    #lux) kde-open "${@:-.}" ;; #for that, look into the DESKTOP_SESSION value
     mac) open "${@:-.}" ;;
     *) echo "Your environment is not defined";;
   esac
 }
 alias p="profile_utils_dirqueue" #push a
 alias q=exit
-#r(){ echo "$*" | bc ;}
 alias r='rm'
 alias rr='rm -rf --'
 alias s=shell                                  #s = launch a new shell
@@ -246,6 +246,15 @@ alias EOF='touchext _EOF'
 #because ?(){ echo "$*" | bc -l ; } crash the profile sometimes
 calcul(){ echo "$*" | bc -l ; }
 alias ?=calcul
+
+
+mc(){ #<msg ...> #git commit
+  typeset msg="$*"
+  git pull
+  git commit -m "$msg"
+  git push
+}
+
 
 ###########################
 # change dir
