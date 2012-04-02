@@ -254,6 +254,15 @@ mc(){ #<msg ...> #git commit
   git commit -m "$msg"
   git push
 }
+alias ms='m status'
+alias mp='m pull; m push'
+ma(){ #<path | *>
+  if [[ "$*" == "" ]]; then
+    m add '*'
+  else
+    m add "$@"
+  fi
+}
 
 
 ###########################
