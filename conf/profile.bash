@@ -251,9 +251,16 @@ alias ?=calcul
 
 mc(){ #<msg ...> #git commit
   typeset msg="$*"
-  git pull
   git commit -m "$msg"
-  git push
+}
+alias ms='m status'
+alias mp='m pull; m push'
+ma(){ #<path | *>
+  if [[ "$*" == "" ]]; then
+    m add '*'
+  else
+    m add "$@"
+  fi
 }
 
 
