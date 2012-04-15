@@ -153,8 +153,9 @@ bind -m vi-insert "\C-l":clear-screen # ^l clear screen
 #alias b=
 c(){ #[<path>|<files ...>]
   typeset param="${1:-$et}"
-
-  if [[ -d "$param" ]]; then #moving to the parameter
+  if [[ "X$param" == "X--" ]]; then #special case, all are for the editor
+    $EDITOR "$@"
+  elif [[ -d "$param" ]]; then #moving to the parameter
     cd "$param"
     $LS
   elif [[ -f "$param" ]]; then #editing the parameters

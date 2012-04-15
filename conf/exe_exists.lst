@@ -12,7 +12,7 @@ shuf
 wget
 
 #util-linux
-more
+more sudo
 
 #ncurses
 tput
