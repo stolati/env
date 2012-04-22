@@ -155,12 +155,14 @@ c(){ #[<path>|<files ...>]
   typeset param="${1:-$et}"
   if [[ "X$param" == "X--" ]]; then #special case, all are for the editor
     $EDITOR "$@"
+  elif [[ "X$param" == "X-" ]]; then #we have a '-' alias for this case in cd, so it's for editor
+    $EDITOR "$@"
   elif [[ -d "$param" ]]; then #moving to the parameter
     cd "$param"
     $LS
   elif [[ -f "$param" ]]; then #editing the parameters
-   $EDITOR "$@"
-  #try to guess
+    $EDITOR "$@"
+    #try to guess
   elif cd "$param" 2>/dev/null ; then #use the bash guess system
     #autocorrection worked for the cd
     $LS
@@ -174,7 +176,7 @@ f(){ #<patterns> ...
   typeset patt
   while [[ $# -gt 0 ]]; do
     [[ -z "$patt" ]] && patt="($1)" || patt="$patt|($1)"
-   shift
+    shift
   done
 
   find . | g "$patt" #if we want it faster, use plain find
@@ -199,11 +201,11 @@ alias m=git
 o(){
   case "$env_type" in
     win) cygstart "${@:-.}" ;;
-    lux) gnome-open "${@:-.}" ;;
-    #lux) kde-open "${@:-.}" ;; #for that, look into the DESKTOP_SESSION value
+  lux) gnome-open "${@:-.}" ;;
+#lux) kde-open "${@:-.}" ;; #for that, look into the DESKTOP_SESSION value
     mac) open "${@:-.}" ;;
-    *) echo "Your environment is not defined";;
-  esac
+  *) echo "Your environment is not defined";;
+esac
 }
 alias p="profile_utils_dirqueue" #push a
 alias q=exit
@@ -243,7 +245,7 @@ TODO(){ find . -type f | xargs -n 100 grep -n TODO ; }
 alias eof='touchext .eof'
 alias EOF='touchext _EOF'
 
--(){ c - ; }
+-(){ cd - ; l ; }
 #because ?(){ echo "$*" | bc -l ; } crash the profile sometimes
 calcul(){ echo "$*" | bc -l ; }
 alias ?=calcul
