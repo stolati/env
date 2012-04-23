@@ -4,10 +4,9 @@
 
 " cause I always made the mistake
 command W w
-command Q q
-command WQ wq
-command wQ wq
-command Wq wq
+command Q q echo "use ZQ instead"
+command WQ echo "use ZZ instead"
+command Wq echo "use ZZ instead"
 
 " Set off unexpected things and reset options
 set nocompatible
