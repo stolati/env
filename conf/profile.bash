@@ -379,6 +379,7 @@ case "$env" in
     ff_path="$base_app/Firefox.app/Contents/MacOS/firefox-bin"
     ;;
   win)
+    nodosfilewarning= #special for cygwin and dos paths
     ff_path="$base_app/firefox/App/Firefox/firefox.exe"
     ff_profile="$(cygpath -w "$ff_profile")"
     ;;
