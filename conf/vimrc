@@ -4,6 +4,10 @@
 
 " cause I always made the mistake
 command W w
+command Q q
+command WQ wq
+command wQ wq
+command Wq wq
 
 " Set off unexpected things and reset options
 set nocompatible
