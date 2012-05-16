@@ -15,11 +15,35 @@ fp(){
   echo "l => search grep"
   echo "o => open (default main)"
   echo "g => git"
+  echo "log => create log file"
 }
 alias fpf="fpga_search vim"
 alias fpl="fpga_search grep"
 alias fpo="fpga_open"
 alias fpg="fpga_git"
+alias fplog="fpga_log"
+
+
+#create a log file for each PCR
+fpga_log(){ #<num> <description>
+  typeset num="$1" desc="$(echo $2)"
+  if [[ -z "$num" || -z "$desc" ]]; then
+    echo "create a log file for FPGA"
+    echo "fpga_log <num pcr> <description>"
+  fi
+  num="prod$(printf '%08s' "$num")"
+  typeset logPath="$PROJECT_FPGA_DEV/patchs/fpgawb_6.0_$num.log"
+  if [[ -e "$logPath" ]]; then
+    echo "File existing, deleting first"
+    rm "$logPath"
+  fi
+  echo "INFO:\\t- $num :\\t$desc\\n" > "$logPath"
+  echo "file $logPath created"
+}
+
+
+
+
 
 
 ##############################
@@ -28,7 +52,7 @@ alias fpg="fpga_git"
 fpga_open(){ #<cmd>
   case "${1:-main}" in
     open) #to be used internally
-      script="$2"; shift; shift
+      typeset script="$2"; shift; shift
       (
         export ATDM_UNIT=EPM
         export ATDMFPGA="$(cygpath -w "$PROJECT_FPGA_DEV")"
@@ -63,7 +87,7 @@ fpga_search(){ #<cmd>
     init)
       echo "initialising the fast search FPGA"
       rm -f "$PROJECT_FPGA_LIST"
-      find "$PROJECT_FPGA_DEV" \( -name '*.tcl' -o -name '*.english' \)-print0 | xargs -0 fgrep -n '' > "$PROJECT_FPGA_LIST"
+      find "$PROJECT_FPGA_DEV" \( -name '*.tcl' -o -name '*.english' \) -print0 | xargs -0 fgrep -n '' > "$PROJECT_FPGA_LIST"
       echo "$(cut -d: -f1 "$PROJECT_FPGA_LIST" | uniq -d | wc -l) files searched"
     ;;
     grep)
@@ -110,6 +134,8 @@ fpga_git(){ #<command>
       echo "!!! Copying !!!"
       #think of the /D parameter of xcopy (copy only newer file)
       time cmd.exe /c xcopy /C /I /E /R /Q /Y "$(cygpath -w "$PROJECT_FPGA_CLEARCASE")" "$(cygpath -w "$PROJECT_FPGA_DEV")"
+
+      chmod -R u+w "$PROJECT_FPGA_DEV"
 
       echo "doing the search init"
       #fpga_search_init >/dev/null
