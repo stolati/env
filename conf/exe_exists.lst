@@ -24,6 +24,8 @@ java gcc #scala
 awk gawk sed ed bc
 wish #tcl
 
+npm
+
 #code
 screen rxvt
 vim emacs

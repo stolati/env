@@ -40,7 +40,7 @@ export TERM=xterm ; tput init #screen is not known everywhere
 #export TERM=ansi ; tput init #screen is not known everywhere
 
 set -o ignoreeof  #^D dont exit
-set -o noclobber  #dont overwrite when doing file redirection
+#set -o noclobber  #dont overwrite when doing file redirection
 #this is no set (even if it's great) because completion code give an error ( on some "exclude" variable )
 #set -o nounset #same as set -u   #err when use unset variable
 #but on all your scripts, you should use "set -eux"
