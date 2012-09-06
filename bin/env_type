@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+case "$OSTYPE" in
+  *cygwin*) echo win  ;;
+  *linux*)  echo lux  ;;
+  *darwin*) echo mac  ;;
+  *)        echo unknown   ;;
+esac
+
+#__EOF__

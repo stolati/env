@@ -27,6 +27,9 @@ args_toEvaluatedVar(){ #args ...
 
 chmod a+x $bin/* #just to be sure
 export PATH=".:$PATH:$bin"
+#for sudo on ubuntu to not change the PATh
+alias sudo='sudo env PATH=$PATH'
+
 export CDPATH="${CDPATH:-}:$et"
 
 export SHELL="$bin/shell" #shell here is

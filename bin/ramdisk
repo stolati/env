@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+size="${1:-1G}"
+path="${2:-/tmp/ramdisk}"
+
+#use env type code
+env_type="$(env_type)"
+
+need_root(){
+  [[ `whoami` == root ]] && return
+  echo "Usage: sudo ramdisk [<size>] [<path>]" 1>&2
+  exit
+}
+
+
+case "$(env_type)" in
+  lux)
+    need_root
+    mkdir -p "$path"
+    chmod 777 "$path"
+    mount -t tmpfs -o size="$size" tmpfs "$path"
+  ;;
+  *)
+    echo "environment $(env_type) not supported yes"
+  ;;
+esac
+
+echo "ramdisk on $path size $size created"
+#__EOF__
