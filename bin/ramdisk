@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 size="${1:-1G}"
-path="${2:-/tmp/ramdisk}"
+path="${2:-/tmp/ramdir}"
 
 #use env type code
 env_type="$(env_type)"
@@ -18,6 +18,10 @@ case "$(env_type)" in
     need_root
     mkdir -p "$path"
     chmod 777 "$path"
+
+    #umount if already mounted
+    umount -l "$path" 2>/dev/null
+
     mount -t tmpfs -o size="$size" tmpfs "$path"
   ;;
   *)

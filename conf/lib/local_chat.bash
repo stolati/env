@@ -10,17 +10,15 @@ mongo(){ "$mongodb_home/bin/mongod" 2>&1 >/dev/null & }
 
 
 chat_launch(){
-  echo "not full enough yet"
-  #typeset ramdir_path="/tmp/ramdisk"
+  typeset ramdir="/tmp/ramdir"
 
-  ##create the tmp path and go under it
-  #sudo mkdir -p "$ramdir_path"
-  #sudo chmod 777 "$ramdir_path"
-  #sudo mount -t tmpfs -o size=1G tmpfs "$ramdir_path"
+  sudo ramdisk 1G "$ramdir"
+  cd "$ramdir"
 
-  #cd "$ramdir_path"
+  echo "getting the project"
+  git clone git@github.com:stolati/C-h-at.git
 
-  #git clone git@github.com:stolati/C-h-at.git
+  cd "C-h-at"
 
   #nohup "$mongodb_home/bin/mongod" 2>&1 >/dev/null &
   #nohup "$intellij_home/bin/idea.sh" 2>&1 >/dev/null &
