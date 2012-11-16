@@ -174,7 +174,39 @@ c(){ #[<path>|<files ...>]
   fi
 }
 #alias d=
-#alias e=
+#execute and forget
+e(){
+  echo "evaluating : $@"
+  eval "$@" 1>/dev/null 2>&1 &
+}
+
+ee(){ #execute a nohup onto the parameters
+  set -x
+  typeset name="$(echo "$*" | sed 's/[^a-zA-Z0-9]/_/g')"
+  typeset filePath="$et/nohup/$name.nohup.out"
+  mkdir -p "$(dirname "$filePath")"
+  (
+    echo "In path : $PWD"
+    echo "Executing command : $@"
+    echo "Begin date at : $(date +%Y%m%d_%H%M%S)"
+  ) >> "$filePath"
+
+  typeset cdpath="$PWD"
+  (
+    nohup bash -l -c eval "$@" \; _ee_end "$filePath" >> "$filePath" 2>&1 &
+  )
+  tail -f "$filePath"
+}
+
+_ee_end(){ #to be used only by ee internal command
+  typeset filePath="$1"
+  (
+    echo "End of the execution date : $(date %Y%m%d_%H%M%S)"
+  ) >> "$filePath"
+}
+
+
+
 f(){ #<patterns> ...
   typeset patt
   while [[ $# -gt 0 ]]; do
@@ -197,7 +229,9 @@ g(){ #[-v] <pattern> [<files>]
 #alias h=
 #alias i=
 #alias j=
-#alias k=
+alias k="smartKill --list"
+alias kk="smartKill --kill"
+alias kw="smartKill --window"
 alias l='$LS'
 alias m=git
 #alias n=
@@ -267,6 +301,8 @@ ma(){ #<path | *>
     m add "$@"
   fi
 }
+
+md(){ git diff "$@"; }
 
 
 ###########################
@@ -390,6 +426,13 @@ esac
 
 alias firefox='"$ff_path" -profile "$ff_profile"'
 alias ff='nohup "$ff_path" -profile "$ff_profile" >/dev/null 2>&1 &'
+
+
+#####################
+# Load the bin path if exists
+#####################
+
+[[ -f "$et/profile_local.bash" ]] && source "$et/profile_local.bash"
 
 #####################
 # Load the profile bash
