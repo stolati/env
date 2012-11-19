@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+#a program to kill others program based on theres names
+
+curProgName="$0"
+command="$1"
+arg="$2"
+
+result="$(ps -eao "%p:%c %a" | grep "$arg" | grep -v "grep" | grep -v "$curProgName")"
+listPid="$(echo "$result" | cut -d: -f1)"
+
+if [[ "$command" == "--kill" ]]; then
+  kill -9 $listPid
+fi
+
+if [[ "$command" == "--list" ]]; then
+  echo "$result" | egrep --color "($arg|$(echo "$listPid" | xargs | tr ' ' '|'))"
+fi
+
+if [[ "$command" == "--window" ]]; then
+  xkill
+fi
+
+
+
+
+
