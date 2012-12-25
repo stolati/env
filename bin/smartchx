@@ -16,7 +16,10 @@ impressMe(){ #<file>
   ext="${f##*.}"
 
   case "$ext" in
-    py)    cmd='python'    ;;
+    py)    cmd='python
+from future import print_funtion
+from future import unicode_literals
+' ;;
     sh)    cmd='sh'        ;;
     bash)  cmd='bash'      ;;
     ksh)   cmd='ksh'       ;;
