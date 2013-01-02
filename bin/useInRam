@@ -1,0 +1,236 @@
+#!/usr/bin/env python
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import stat
+import sys
+import shutil
+import subprocess
+import os
+import os.path
+from optparse import OptionParser
+import tempfile
+import time
+
+
+#possibility of amelioration :
+# - continue killed ramdisk
+# - have multiple ramdisk with multiples sizes
+# - look for ram and say when the ram runs low
+
+##################
+# Set the special commands depending of the os
+##################
+class MountedException(Exception): pass
+
+class LinuxCommands:
+
+  @staticmethod
+  def needRoot():
+    if os.geteuid() == 0 : return
+    args = ['sudo', sys.executable] + sys.argv + [os.environ]
+    os.execlpe('sudo', *args) #replace current process
+
+  @staticmethod
+  def makedirs(path, everybodyAccess = False, catchError = False):
+    if catchError:
+      if os.path.isdir(path): return
+    os.makedirs(path) #return exception if self.dir exists
+    os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+
+  @staticmethod
+  def copyCarbon(path_from, path_to):
+    #copy the inside of path_from directory to path_to directory
+    if not os.path.isdir(path_from) or not os.path.isdir(path_to):
+      raise Exception("Code error for coping : [%s] to [%s]" % (path_from, path_to))
+    subprocess.check_call(['cp', '--archive', '--force', '--no-target-directory', '--', path_from, path_to])
+
+  @staticmethod
+  def fastSyncDirs(path_from, path_to):
+    #-rlptgoD
+    #copy the inside of path_from directory to path_to directory
+    if not os.path.isdir(path_from) or not os.path.isdir(path_to):
+      raise Exception("Code error for syncing : [%s] to [%s]" % (path_from, path_to))
+    subprocess.check_call(['rsync', '--archive', '--update', '--delete', '--verbose', '--', path_from + '/', path_to])    
+
+  class RamDisk:
+    def __init__(self, size, path, force = False):
+      self.size = size
+      self.dir = os.path.abspath(path)
+      self.force = force
+
+    def path(self): return self.dir
+
+    def __enter__(self):
+      if self.force: shutil.rmtree(self.dir, True)
+
+      try:
+        LinuxCommands.makedirs(self.dir, everybodyAccess = True)
+      except OSError:
+        raise MountedException('The directory for the mount system already exists [%s]' % self.dir)
+
+      try:
+        subprocess.check_call(['mount', '-t', 'tmpfs', '-o', 'size='+self.size, 'tmpfs', self.dir])
+      except:
+        shutil.rmtree(self.dir)
+        raise
+
+      if not os.path.ismount(self.dir): raise NotMounted('Directory [%s] not mounted' % self.dir)
+      return self
+      
+    def __exit__(self, a, b, c):
+      try:
+        shutil.rmtree(self.dir)
+      except: pass
+      subprocess.check_call(['umount', '-l', self.dir])
+      
+
+
+
+##################
+# Heart of the code
+##################
+
+
+class Path:
+  #states
+  NOTHING_HERE = "NOTHING_HERE"
+  DUPLICATE = "DUPLICATE"
+  LINKED = "LINKED"
+  NOT_LINKED = "NOT_LINKED"
+  ONLY_ORI = "ONLY_ORI"
+
+  def __init__(self, my_path, ram_path):
+    self.my_path = os.path.abspath(my_path)
+    self.ram_path = os.path.abspath(ram_path)
+
+  def path(self): return self.my_path
+  def ori(self): return '%s_ori' % self.my_path
+  def ram(self): return os.path.join(self.ram_path, os.path.basename(self.my_path))
+
+  def state(self):
+    isPathLink = os.path.islink(self.path())
+    isPathOri = os.path.exists(self.path()) and not isPathLink
+
+    hasOri = os.path.exists(self.ori())
+    hasRam = os.path.exists(self.ram())
+
+    if isPathOri:
+      if hasOri: return Path.DUPLICATE
+      return Path.NOT_LINKED
+
+    if not hasOri: return Path.NOTHING_HERE
+    if isPathLink: return Path.LINKED
+    return Path.ONLY_ORI
+
+
+class DuplicateFound(Exception): pass
+
+class UseInRam:
+
+  def __init__(self, paths, ramdisk, force = False):
+    self.paths = [Path(os.path.abspath(p), ramdisk.path()) for p in paths]
+    self.ramdisk = ramdisk
+    self.force = force
+
+  def __enter__(self):
+    self.clean()
+
+    #first copy stuff, in case of no place left on device
+    for p in self.paths:
+      print('Copying path : ' + p.path())
+      LinuxCommands.makedirs(p.ram(), everybodyAccess = True)
+      LinuxCommands.copyCarbon(p.path(), p.ram())
+
+    for p in self.paths:
+      shutil.move(p.path(), p.ori())
+      os.symlink(p.ram(), p.path())
+
+    return self
+
+
+  def clean(self):
+    #clean special states, without knowledge of the ram path
+    for p in self.paths:
+      state = p.state()
+      if state == Path.NOTHING_HERE:
+        #TODO : normal if forced, else error
+        #it could be normal, TODO too special : unormal this
+        print('makedirs')
+        if os.path.islink(p.path()) : os.remove(p.path())
+        LinuxCommands.makedirs(p.path(), everybodyAccess = True, catchError = True)
+      if state == Path.DUPLICATE:
+        #ask the user and crash
+        raise DuplicateFound('Duplicate found on files\nselect the one before continuing :\n [%s] and [%s]' % (p.ori(), p.path()))
+      if state == Path.LINKED:
+        #unlink and place the ori in place
+        os.remove(p.path())
+        shutil.move(p.ori(), p.path())
+      if state == Path.NOT_LINKED:
+        #nothing to do, 
+        pass
+      if state == Path.ONLY_ORI:
+        #replace the ori in place
+        shutil.move(p.ori(), p.path())
+    
+
+  def __exit__(self, a, b, c):
+    self.sync()
+
+    for p in self.paths:
+      print('cleaning path : ' + p.path())
+      os.remove(p.path())
+      shutil.move(p.ori(), p.path())
+      shutil.rmtree(p.ram())
+      
+
+  def sync(self):
+    for p in self.paths:
+      print('sync path : ' + p.path())
+      LinuxCommands.fastSyncDirs(p.ram(), p.ori())
+  
+if __name__ == "__main__":
+  command = None
+  if sys.platform.startswith('linux'): command = LinuxCommands()   
+
+  command.needRoot() #should be the first
+
+  parser = OptionParser("usage: %prog [options] path1 path2")
+  parser.add_option("-s", "--size", dest="size", help="size of the ramdir", default="1G")
+  parser.add_option("-p", "--path", dest="rampath", help="path of the ramdir directory", default="/tmp/rampath_useInRam")
+  parser.add_option("-f", "--force", dest="force", action="store_true", help="size of the ramdir", default=False)
+  parser.add_option("-m", "--minute", dest="time", help="number of minutes between each backup sync", default=1, type="long")
+  parser.add_option("-v", "--verbose", dest="verbose", action="store_true", help="show more infos", default=False)
+
+  (options, args) = parser.parse_args()
+  if not args: args = [os.path.join(os.getenv('HOME'), 'use_in_ram')]
+
+  if options.verbose:
+    for name in ['rampath', 'size', 'force', 'time', 'verbose']:
+      print('option %s\t=\t%s' % (name, getattr(options, name)))
+    print('')
+
+  print('The ram path will be used on the path%s:' % ('s' if len(args) > 1 else '') )
+  for path in args: print('\t%s' % path)
+  print('')
+
+  wait_second = options.time * 60
+
+  try:
+    with command.RamDisk(options.size, options.rampath, options.force) as cur_ramdisk:
+      with UseInRam(args, cur_ramdisk, options.force) as cur_inRam:
+        print('Initiation done')
+        try:
+          while True:
+            print('waiting %s minutes' % options.time)
+            time.sleep(wait_second)
+            cur_inRam.sync()
+        
+        except KeyboardInterrupt:
+          pass #the only way to get out
+        print('\nCtrl-C pressed, stopping the script')
+
+  except DuplicateFound as e:
+    print(e)
+
+  print("end")
