@@ -77,7 +77,7 @@ fi
 #adding colors
 export CLICOLOR=1
 export PS1_RESET="`term_color reset`"
-PS1='\[$PS1_COLOR\]$?/\D{%H%M%S}:\u@\h\w>\[$PS1_RESET\] '
+PS1='\[$PS1_COLOR\]$?/\D{%H%M%S}:\u@\h\w$(__git_ps1 "\n%s")>\[$PS1_RESET\] '
 #PS1_COLOR will be set at the end of this script
 
 #python
@@ -193,6 +193,7 @@ ee(){ #execute a nohup onto the parameters
 
   typeset cdpath="$PWD"
   (
+    #TODO : trap "" 1 #catch the nohup signal
     nohup bash -l -c eval "$@" \; _ee_end "$filePath" >> "$filePath" 2>&1 &
   )
   tail -f "$filePath"
@@ -226,6 +227,9 @@ g(){ #[-v] <pattern> [<files>]
 
   egrep $v $i --color "$1"
 }
+gv(){ #<pattern> [<files>]
+  g -v "$@"
+}
 #alias h=
 #alias i=
 #alias j=
@@ -246,7 +250,16 @@ esac
 }
 alias p="profile_utils_dirqueue" #push a
 alias q=exit
-alias r='rm'
+r(){
+  while [[ $# -gt 0 ]]; do
+    typeset f="$1" ; shift
+    if [[ -d "$f" ]]; then
+      rmdir -p -v -- "$f"
+    else 
+      rm -v -- "$f"
+    fi
+  done
+}
 alias rr='rm -rf --'
 alias s=shell                                  #s = launch a new shell
 t(){
@@ -263,6 +276,10 @@ alias x=smartchx
 alias tf='tail -f'
 alias cp='scp -r'
 
+alias 0n="tr '\0' '\n'"
+alias n0="tr '\n' '\0'"
+
+
 alias ll='l -ahtr' #if it's not l we want, it's ll
 lc(){ ls "$@" | wc -l ; } #count number of files
 #TODO why it bug : lt(){ l | tail $1 ; } #l with tail
@@ -271,6 +288,7 @@ llt(){ ll | tail $1 ; } #ll with tail
 fg(){ find . -type f -print0 | xargs -0 egrep --color -i "$1" ; }
 
 lg(){ l | g "$@" ; }
+lgv(){ l | gv "$@$" ; }
 
 alias pl='dirs -p -l'
 
@@ -283,26 +301,33 @@ alias eof='touchext .eof'
 alias EOF='touchext _EOF'
 
 -(){ cd - ; l ; }
-#because ?(){ echo "$*" | bc -l ; } crash the profile sometimes
+#because ?(){ echo "$*" | bc -l ; } crash the profile sometimesk
 calcul(){ echo "$*" | bc -l ; }
 alias ?=calcul
 
 
 mc(){ #<msg ...> #git commit
-  typeset msg="$*"
+  typeset msg="$*" branch="$(git rev-parse --abbrev-ref HEAD)"  
+  git pull origin "$branch" || return
   git commit -m "$msg"
+  git push origin "$branch" || return
 }
 alias ms='m status'
 alias mp='m pull; m push'
 ma(){ #<path | *>
-  if [[ "$*" == "" ]]; then
-    m add '*'
-  else
+  #if [[ "$*" == "" ]]; then
+  #  m add '*'
+  #else
     m add "$@"
-  fi
+  #fi
 }
 
 md(){ git diff "$@"; }
+save(){ #copy the path given to the same location + date
+  typeset date="$(date +%Y%m%d_%H%M%S)"
+  echo "Creating ${1}_$date ..."
+  \cp --archive "$1" "${1}_$date"
+}
 
 
 ###########################
@@ -462,6 +487,28 @@ if [[ "${TYPE_ENV:-}" == dont_know ]]; then
   done
 fi
 
+#Git part
+#export GIT_CONFIG="$conf/gitconfig git fetch --all"
+if [[ ! -f "$HOME/.gitconfig" ]]; then
+  cat "$conf/gitconfig" > "$HOME/.gitconfig"
+fi
+
+__git_ps1 () { # params
+  typeset branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+  if [[ -n "$branch" ]]; then
+    printf "$1" "$branch"    
+  fi
+}
+
+
+#. "$conf/git-completion-gilles"
+. "$conf/git-completion.bash"
+
+
+
+
+
+
 #bash variable sheet
 # ${toto#reg} delete the shortest match from the left
 # ${toto##reg} delete the longest match from the left
@@ -471,6 +518,9 @@ fi
 # ${toto:=lala} $toto or toto="lala" ; $toto
 # ${toto:+lala} $toto and "lala" or ""
 # ${toto:?"lala"} $toto or echo "lala"
+
+
+
 
 
 #__EOF__
