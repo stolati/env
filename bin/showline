@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+help(){
+  echo "showline <line>"
+  echo "show line of a file highlighted"
+  echo " -n <number> : number of lines to show around, default = 10"
+  echo " -i <input> : input file (or -), default = -"
+  echo " -c <color> : color to highite, default = green"
+}
+
+set -eu
+
+nb_lines=10
+input_file=-
+color=green
+
+while getopts "n:i:c:" optname; do
+  case "$optname" in
+    "n") nb_lines="$OPTARG" ; shift 2 ;;
+    "i") input_file="$OPTARG" ; shift 2 ;;
+    "c") color="$OPTARG" ; shift 2 ;;
+    *)  help; exit 1  ;;
+  esac
+done
+
+line_no="$1"
+
+input_tmp=false
+if [[ "$input_file" == "-" ]]; then
+  tmp_file="/tmp/$RANDOM.showline.$(date +%Y%m%d_%H%M%S)"
+  input_tmp=true
+  input_file="$tmp_file"
+  cat > "$tmp_file"
+fi
+
+#total_size="$(cat "$input_file" | wc -l | xargs)"
+#TODO when end of file (or begin of file), do the size right
+
+cat "$input_file" | head -$(($line_no-1)) | tail -$(($nb_lines))
+tput setaf 2
+cat "$input_file" | head -$(($line_no)) | tail -1
+tput sgr0
+cat "$input_file" | head -$(($line_no + $nb_lines)) | tail -$(($nb_lines))
+
+$input_tmp && rm "$tmp_file"
+
+#__EOF__

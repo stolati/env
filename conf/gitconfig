@@ -1,0 +1,30 @@
+[user]
+	name = Mickael Kerbrat
+	email = stolati@gmail.com
+[rerere]
+	enabled = true
+[core]
+	editor = subl -w
+	excludesfile = /Users/gillesmanzato/.gitignore
+[alias]
+	st = status
+	co = checkout
+	ba = branch -v -a
+	nlog = log --name-status
+	glog = log --graph --abbrev-commit
+	sglog = log --graph --abbrev-commit --pretty=oneline
+	slog = log --pretty=oneline --abbrev-commit
+	dlog = log -p
+	ci = commit -v
+	br = branch -v
+	ru = remote update
+	su = submodule update
+	si = submodule init
+[color]
+	ui = auto
+[merge]
+	summary = true
+	tool = Kaleidoscope
+[diff]
+	external = /home/mick/env/bin/gitMeldDiff
+

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#TODO use pgrep and pkill
+
 
 #a program to kill others program based on theres names
 
@@ -10,6 +12,11 @@ result="$(ps -eao "%p:%c %a" | grep "$arg" | grep -v "grep" | grep -v "$curProgN
 listPid="$(echo "$result" | cut -d: -f1)"
 
 if [[ "$command" == "--kill" ]]; then
+  if [[ -z "$arg" ]]; then
+    echo "You want to kill everything ? use shutdown instead !"
+    exit 1
+  fi
+  
   kill -9 $listPid
 fi
 
