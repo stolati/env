@@ -26,12 +26,10 @@ screen_size="${SCREEN_SIZE:-160x60}"
 
 [ -n "$et" ] && cd "$et"
 
-rxvt \
+urxvt \
 --title "$title" \
 -bg 'rgb:00/00/20' \
 -fg 'rgb:C0/C0/C0' \
--fn '-*-Consolas-regular-*-*-*-14-*-*-*-*-*-*-*' \
--fb '-*-Consolas-bold-*-*-*-14-*-*-*-*-*-*-*' \
 -vb \
 +sb \
 -sl 0 \
@@ -54,4 +52,6 @@ rxvt \
 -e $screen_launch \
 &
 
+#-fn '-*-Consolas-regular-*-*-*-14-*-*-*-*-*-*-*' \
+#-fb '-*-Consolas-bold-*-*-*-14-*-*-*-*-*-*-*' \
 #__EOF__

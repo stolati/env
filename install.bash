@@ -44,5 +44,12 @@ testFile "$f" && {
   echo "source '$myHome/env/conf/profile.bash'"
 } >> $f
 
+#Link conf files to home
+rm -rf "$HOME/.emacs.d"
+ln -s "$myHome/env/conf/emacs" "$HOME/.emacs.d"
+
+
+
+
 echo done
 #__EOF__#

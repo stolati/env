@@ -180,6 +180,8 @@ e(){
   eval "$@" 1>/dev/null 2>&1 &
 }
 
+alias E=e #because to get to insert at the beginning, I use the "I", which use majuscule
+
 ee(){ #execute a nohup onto the parameters
   set -x
   typeset name="$(echo "$*" | sed 's/[^a-zA-Z0-9]/_/g')"
@@ -255,7 +257,7 @@ r(){
     typeset f="$1" ; shift
     if [[ -d "$f" ]]; then
       rmdir -p -v -- "$f"
-    else 
+    else
       rm -v -- "$f"
     fi
   done
@@ -307,28 +309,28 @@ alias ?=calcul
 
 
 mc(){ #<msg ...> #git commit
-  typeset msg="$*" branch="$(git rev-parse --abbrev-ref HEAD)"  
+  typeset msg="$*" branch="$(git rev-parse --abbrev-ref HEAD)"
   git pull origin "$branch" || return
   git commit -m "$msg"
   git push origin "$branch" || return
 }
 alias ms='m status'
-alias mp='m pull; m push'
-ma(){ #<path | *>
-  #if [[ "$*" == "" ]]; then
-  #  m add '*'
-  #else
-    m add "$@"
-  #fi
+alias ma='m add'
+mp(){ #<branch> #git rebase
+  typeset branch="origin/${1:-$(git rev-parse --abbrev-ref HEAD)}"
+  m rebase "$branch"
 }
 
 md(){ git diff "$@"; }
 save(){ #copy the path given to the same location + date
   typeset date="$(date +%Y%m%d_%H%M%S)"
-  echo "Creating ${1}_$date ..."
-  \cp --archive "$1" "${1}_$date"
+  typeset path="${1%/}"
+  echo "Creating ${path}_$date ..."
+  \cp --archive "$path" "${path}_$date"
 }
 
+#Echo and then execute the command
+excho(){ echo "$@" ; "$@" ; }
 
 ###########################
 # change dir
@@ -392,10 +394,15 @@ alias sf='serv -c $conf/hosts.lst -f' #connect through ftp
 #create a custom watch so i can use my aliases
 #Ctrl-c to quit
 profile_utils_watch(){
-  typeset new="$(eval $@)"
-  typeset old
+  [[ "X$1" == "X-h" ]] && {
+    echo "w [-x command to execute each time output change] [command to show and follow]"
+    exit 1
+  }
+  typeset exe="date"
+  [[ "X$1" == "X-x" ]] && { exe="$2" ; shift; shift ; }
+  typeset new="$(eval $@)" old=""
   while true; do
-    date
+    eval "$exe"
     echo "$new"
     old="$new"
     while [ "X$old" == "X$new" ]; do
@@ -496,7 +503,7 @@ fi
 __git_ps1 () { # params
   typeset branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
   if [[ -n "$branch" ]]; then
-    printf "$1" "$branch"    
+    printf "$1" "$branch"
   fi
 }
 

@@ -4,8 +4,6 @@
 [rerere]
 	enabled = true
 [core]
-	editor = subl -w
-	excludesfile = /Users/gillesmanzato/.gitignore
 [alias]
 	st = status
 	co = checkout
