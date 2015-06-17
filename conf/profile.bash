@@ -74,10 +74,20 @@ else
 fi
 
 
+# Informations about sub bash
+export SUB_BASH_LEVEL="$((${SUB_BASH_LEVEL:--1}+1))"
+case "$SUB_BASH_LEVEL" in
+    0) export PS1_SUB_BASH="" ;;
+    1) export PS1_SUB_BASH="-" ;;
+    2) export PS1_SUB_BASH="--" ;;
+    *) export PS1_SUB_BASH="$BASH_LEVEL-" ;;
+esac
+
+
 #adding colors
 export CLICOLOR=1
 export PS1_RESET="`term_color reset`"
-PS1='\[$PS1_COLOR\]$?/\D{%H%M%S}:\u@\h\w$(__git_ps1 "\n%s")>\[$PS1_RESET\] '
+PS1='\[$PS1_COLOR\]$PS1_SUB_BASH$?/\D{%H%M%S}:\u@\h\w$(__git_ps1 "\n%s")>\[$PS1_RESET\] '
 #PS1_COLOR will be set at the end of this script
 
 #python
@@ -471,7 +481,7 @@ alias ff='nohup "$ff_path" -profile "$ff_profile" >/dev/null 2>&1 &'
 #####################
 email="$(str_lower `whoami`@`hostname`)"
 
-source "$conf/local.conf"
+source "$conf/local.bash"
 
 case "${TYPE_ENV:-}" in
   dev) PS1_COLOR=`term_color fg_blue`;;
