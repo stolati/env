@@ -23,7 +23,12 @@ screen_size="${SCREEN_SIZE:-160x60}"
 
 [ -n "$et" ] && cd "$et"
 
-rxvt \
+cmd=urxvt
+if ! which $cmd > /dev/null 2>/dev/null; then
+  cmd=rxvt
+fi
+
+$cmd \
 --title "$title" \
 -bg 'rgb:00/00/20' \
 -fg 'rgb:C0/C0/C0' \
